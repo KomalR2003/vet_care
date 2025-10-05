@@ -162,14 +162,7 @@ const AppSidebar = ({ user, setCurrentView, setUser, currentView, isSidebarOpen,
         {/* Header/Logo */}
         <div className="p-6 border-b">
           <div className="flex items-center space-x-3">
-            {/* <div className="w-8 h-8 bg-blue-100 rounded-full flex items-center justify-center">
-              <Heart className="w-5 h-5 text-blue-600" />
-            </div>
-            <div>
-              <h1 className="text-xl font-bold text-blue-600">VetCare</h1>
-              <p className="text-xs text-gray-500">Pet Health Management</p>
-            </div> */}
-             <img src={logo} alt="Logo" />
+             <img src={logo} alt="Logo"  height={20} width={140}/>
           </div>
         </div>
 
