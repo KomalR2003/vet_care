@@ -32,9 +32,7 @@ function App() {
   const [isSidebarOpen, setIsSidebarOpen] = useState(false);
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState(null);
-  // const [formErrors, setFormErrors] = useState({});
 
-  // Fetch data from backend when user is logged in
   useEffect(() => {
     if (user) {
       fetchData();
@@ -45,14 +43,15 @@ function App() {
     try {
       setLoading(true);
       
-      // Fetch pets, appointments, doctors based on user role
       if (user.role === 'pet owner') {
-        const [petsResponse, appointmentsResponse] = await Promise.all([
+        const [petsResponse, appointmentsResponse, doctorsResponse] = await Promise.all([
           petsAPI.getPets(),
-          appointmentsAPI.getAppointments()
+          appointmentsAPI.getAppointments(),
+          doctorsAPI.getDoctors()
         ]);
         setPets(petsResponse.data);
         setAppointments(appointmentsResponse.data);
+        setDoctors(doctorsResponse.data);
       } else if (user.role === 'doctor') {
         const [appointmentsResponse, petsResponse] = await Promise.all([
           appointmentsAPI.getAppointments(),
@@ -78,7 +77,6 @@ function App() {
     }
   };
 
-  // Common props for admin pages
   const adminProps = {
     user,
     pets,
@@ -91,7 +89,6 @@ function App() {
     setIsSidebarOpen
   };
 
-  // Common props for other pages
   const commonProps = {
     user,
     setCurrentView,
@@ -101,14 +98,12 @@ function App() {
     setIsSidebarOpen
   };
 
-  // Main render logic
   if (!user) {
     return currentView === 'register'
       ? <Register setCurrentView={setCurrentView} />
-      : <Login setUser={setUser} setCurrentView={setCurrentView} />;
+      : <Login onLogin={setUser} setCurrentView={setCurrentView} />;
   }
 
-  // Role-based dashboard rendering
   if (user.role === 'admin') {
     switch (currentView) {
       case 'dashboard':
@@ -131,21 +126,21 @@ function App() {
   }
 
   if (user.role === 'doctor') {
-  switch (currentView) {
-    case 'dashboard':
-      return <DoctorDashboard {...commonProps} appointments={appointments} setAppointments={setAppointments} />;
-    case 'my-appointments':
-      return <MyAppointmentsDoctor {...commonProps} appointments={appointments} setAppointments={setAppointments} />;
-    case 'patient-history':
-      return <PatientHistory {...commonProps} appointments={appointments} pets={pets} />;
-    case 'reports':
-      return <Reports {...commonProps} reports={[]} />;
-    case 'settings':
-      return <Settings {...commonProps} />;
-    default:
-      return <DoctorDashboard {...commonProps} appointments={appointments} setAppointments={setAppointments} />;
+    switch (currentView) {
+      case 'dashboard':
+        return <DoctorDashboard {...commonProps} appointments={appointments} setAppointments={setAppointments} />;
+      case 'my-appointments':
+        return <MyAppointmentsDoctor {...commonProps} appointments={appointments} setAppointments={setAppointments} />;
+      case 'patient-history':
+        return <PatientHistory {...commonProps} appointments={appointments} pets={pets} />;
+      case 'reports':
+        return <Reports {...commonProps} reports={[]} />;
+      case 'settings':
+        return <Settings {...commonProps} />;
+      default:
+        return <DoctorDashboard {...commonProps} appointments={appointments} setAppointments={setAppointments} />;
+    }
   }
-}
 
   if (user.role === 'pet owner') {
     switch (currentView) {
@@ -170,8 +165,7 @@ function App() {
     }
   }
 
-  // Fallback
-  return <Login setUser={setUser} setCurrentView={setCurrentView} />;
+  return <Login onLogin={setUser} setCurrentView={setCurrentView} />;
 }
 
 export default App;

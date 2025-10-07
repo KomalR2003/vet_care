@@ -1,54 +1,45 @@
-import React, { useState } from "react";
-import { authAPI } from "../../api/api";
-import validateForm from "../../utils/validateForm";
+import React, { useState } from 'react';
+import { authAPI } from '../../api/api';
+import { LogIn, Mail, Lock, AlertCircle } from 'lucide-react';
+import logo from '../../assets/logo.png';
 
-const Login = ({ setUser, setCurrentView }) => {
-  const [formErrors, setFormErrors] = useState({});
+const Login = ({ onLogin, setCurrentView }) => {
+  const [formData, setFormData] = useState({
+    email: '',
+    password: ''
+  });
   const [loading, setLoading] = useState(false);
-  const [error, setError] = useState(null);
+  const [error, setError] = useState('');
 
-  const handleLogin = async (e) => {
+  const handleChange = (e) => {
+    setFormData({
+      ...formData,
+      [e.target.name]: e.target.value
+    });
+    setError(''); // Clear error when user types
+  };
+
+  const handleSubmit = async (e) => {
     e.preventDefault();
-    const formData = new FormData(e.target);
-    // Validate form
-    const errors = validateForm(formData, "login");
-    if (Object.keys(errors).length > 0) {
-      setFormErrors(errors);
-      return;
-    }
+    setLoading(true);
+    setError('');
+
     try {
-      setLoading(true);
-      setFormErrors({});
-      setError(null);
-      // Call backend login API
-      const res = await authAPI.login({
-        email: formData.get("email"),
-        password: formData.get("password"),
-      });
-      console.log("Login response:", res.data);
-      setUser(res.data.user);
-      localStorage.setItem("token", res.data.token);
+      const response = await authAPI.login(formData);
+      console.log('Login response:', response.data);
       
-      // Redirect based on user role
-      const userRole = res.data.user.role;
-      switch (userRole) {
-        case 'admin':
-          setCurrentView("dashboard"); // Goes to Admin Dashboard
-          break;
-        case 'doctor':
-          setCurrentView("dashboard"); // Goes to Doctor Dashboard
-          break;
-        case 'pet owner':
-        default:
-          setCurrentView("dashboard"); // Goes to Pet Owner Dashboard
-          break;
-      }
-    } catch (err) {
-      if (err.response && err.response.data && err.response.data.message) {
-        setFormErrors({ email: err.response.data.message });
+      if (response.data.token && response.data.user) {
+        onLogin(response.data.user);
       } else {
-        setError("Login failed");
+        setError('Invalid response from server');
       }
+    } catch (error) {
+      console.error('Login error:', error);
+      setError(
+        error.response?.data?.error || 
+        error.response?.data?.message || 
+        'Login failed. Please check your credentials.'
+      );
     } finally {
       setLoading(false);
     }
@@ -56,51 +47,100 @@ const Login = ({ setUser, setCurrentView }) => {
 
   return (
     <div className="min-h-screen bg-gradient-to-br from-blue-50 to-indigo-100 flex items-center justify-center p-4">
-      <div className="bg-white rounded-2xl shadow-xl p-8 w-full max-w-md">
+      <div className="bg-white rounded-2xl shadow-xl w-full max-w-md p-8">
+        {/* Logo and Header */}
         <div className="text-center mb-8">
-          <h1 className="text-3xl font-bold text-gray-800 mb-2">VetCare</h1>
-          <p className="text-gray-600">Book your pet's appointment</p>
+          <img src={logo} alt="PetCare Logo" className="h-12 mx-auto mb-4" />
+          <h1 className="text-3xl font-bold text-gray-800 mb-2">Welcome Back</h1>
+          <p className="text-gray-600">Sign in to your account</p>
         </div>
-        <form onSubmit={handleLogin} className="space-y-6">
-          <div>
-            <label className="block text-sm font-medium text-gray-700 mb-2">Email</label>
-            <input
-              type="email"
-              name="email"
-              required
-              className="w-full px-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500"
-              placeholder="Enter your email"
-            />
-            {formErrors.email && <p className="text-red-500 text-sm mt-1">{formErrors.email}</p>}
+
+        {/* Error Message */}
+        {error && (
+          <div className="mb-6 p-4 bg-red-50 border border-red-200 rounded-lg flex items-start">
+            <AlertCircle className="w-5 h-5 text-red-600 mr-2 flex-shrink-0 mt-0.5" />
+            <span className="text-red-700 text-sm">{error}</span>
           </div>
+        )}
+
+        {/* Login Form */}
+        <form onSubmit={handleSubmit} className="space-y-6">
+          {/* Email Field */}
           <div>
-            <label className="block text-sm font-medium text-gray-700 mb-2">Password</label>
-            <input
-              type="password"
-              name="password"
-              required
-              className="w-full px-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500"
-              placeholder="Enter your password"
-            />
-            {formErrors.password && <p className="text-red-500 text-sm mt-1">{formErrors.password}</p>}
+            <label className="block text-sm font-medium text-gray-700 mb-2">
+              Email Address
+            </label>
+            <div className="relative">
+              <Mail className="absolute left-3 top-1/2 transform -translate-y-1/2 w-5 h-5 text-gray-400" />
+              <input
+                type="email"
+                name="email"
+                value={formData.email}
+                onChange={handleChange}
+                placeholder="your@email.com"
+                required
+                className="w-full pl-10 pr-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent"
+              />
+            </div>
           </div>
-          {error && <p className="text-red-500 text-sm mt-1">{error}</p>}
+
+          {/* Password Field */}
+          <div>
+            <label className="block text-sm font-medium text-gray-700 mb-2">
+              Password
+            </label>
+            <div className="relative">
+              <Lock className="absolute left-3 top-1/2 transform -translate-y-1/2 w-5 h-5 text-gray-400" />
+              <input
+                type="password"
+                name="password"
+                value={formData.password}
+                onChange={handleChange}
+                placeholder="••••••••"
+                required
+                className="w-full pl-10 pr-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent"
+              />
+            </div>
+          </div>
+
+          {/* Submit Button */}
           <button
             type="submit"
-            className="w-full bg-blue-600 text-white py-3 rounded-lg font-semibold hover:bg-blue-700 transition-colors"
             disabled={loading}
+            className="w-full bg-blue-600 text-white py-3 rounded-lg font-medium hover:bg-blue-700 transition-colors disabled:opacity-50 disabled:cursor-not-allowed flex items-center justify-center"
           >
-            {loading ? 'Signing In...' : 'Sign In'}
+            {loading ? (
+              <>
+                <div className="animate-spin rounded-full h-5 w-5 border-b-2 border-white mr-2"></div>
+                Signing in...
+              </>
+            ) : (
+              <>
+                <LogIn className="w-5 h-5 mr-2" />
+                Sign In
+              </>
+            )}
           </button>
         </form>
+
+        {/* Register Link */}
         <div className="mt-6 text-center">
-          <button
-            type="button"
-            onClick={() => setCurrentView('register')}
-            className="text-blue-600 hover:text-blue-800 font-medium"
-          >
-            Don't have an account? Sign up
-          </button>
+          <p className="text-gray-600">
+            Don't have an account?{' '}
+            <button
+              onClick={() => setCurrentView('register')}
+              className="text-blue-600 hover:text-blue-800 font-medium"
+            >
+              Sign up
+            </button>
+          </p>
+        </div>
+
+        {/* Demo Credentials (Optional - remove in production) */}
+        <div className="mt-6 p-4 bg-gray-50 rounded-lg">
+          <p className="text-xs text-gray-600 text-center mb-2">Demo Credentials:</p>
+          <p className="text-xs text-gray-500 text-center">Pet Owner: owner@test.com / password</p>
+          <p className="text-xs text-gray-500 text-center">Doctor: doctor@test.com / password</p>
         </div>
       </div>
     </div>

@@ -8,6 +8,7 @@ const api = axios.create({
   headers: {
     'Content-Type': 'application/json',
   },
+  timeout: 10000, // 10 second timeout
 });
 
 // Add request interceptor to include auth token
@@ -28,22 +29,74 @@ api.interceptors.request.use(
 api.interceptors.response.use(
   (response) => response,
   (error) => {
+    // Only redirect to login on 401 if we have a response
     if (error.response?.status === 401) {
+      console.log('Authentication error - clearing session');
       localStorage.removeItem('token');
       localStorage.removeItem('user');
-      window.location.href = '/login';
+      
+      // Only redirect if not already on login page
+      if (window.location.pathname !== '/login') {
+        // For SPA, you might want to use a custom event instead
+        window.dispatchEvent(new CustomEvent('auth-error'));
+      }
     }
+    
+    // Log other errors for debugging
+    if (error.response) {
+      console.error('API Error:', {
+        status: error.response.status,
+        data: error.response.data,
+        url: error.config?.url
+      });
+    } else if (error.request) {
+      console.error('Network Error:', error.message);
+    }
+    
     return Promise.reject(error);
   }
 );
 
 // Auth API
 export const authAPI = {
-  login: (credentials) => api.post('/login', credentials),
-  register: (userData) => api.post('/register', userData),
+  login: async (credentials) => {
+    const response = await api.post('/login', credentials);
+    // Store token and user data
+    if (response.data.token) {
+      localStorage.setItem('token', response.data.token);
+    }
+    if (response.data.user) {
+      localStorage.setItem('user', JSON.stringify(response.data.user));
+    }
+    return response;
+  },
+  
+  register: async (userData) => {
+    const response = await api.post('/register', userData);
+    return response;
+  },
+  
   logout: () => {
     localStorage.removeItem('token');
     localStorage.removeItem('user');
+  },
+
+  // Check if user is authenticated
+  isAuthenticated: () => {
+    const token = localStorage.getItem('token');
+    const user = localStorage.getItem('user');
+    return !!(token && user);
+  },
+
+  // Get current user from localStorage
+  getCurrentUser: () => {
+    try {
+      const userStr = localStorage.getItem('user');
+      return userStr ? JSON.parse(userStr) : null;
+    } catch (error) {
+      console.error('Error parsing user data:', error);
+      return null;
+    }
   }
 };
 
