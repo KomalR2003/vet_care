@@ -8,10 +8,7 @@ import {
   Plus,
   MoreVertical,
 } from "lucide-react";
-
-
-
-// const API_BASE_URL = import.meta.env.VITE_API_URL || "http://127.0.0.1:8000";
+import { chatbotAPI } from '../../../api/api';
 
 const Sidebar = ({
   isOpen,
@@ -26,43 +23,39 @@ const Sidebar = ({
   const [chatSessions, setChatSessions] = useState([]);
   const [loading, setLoading] = useState(false);
   const [showDeleteMenu, setShowDeleteMenu] = useState(null);
-  const [message, setMessage] = useState({ text: "", type: "" }); // ✅ for success/error messages
+  const [message, setMessage] = useState({ text: "", type: "" });
 
-  // Fetch chat sessions initially and on refresh
   useEffect(() => {
     fetchChatSessions();
   }, [refreshTrigger]);
 
-  // Fetch sessions when sidebar opens (mobile)
   useEffect(() => {
     if (isOpen) fetchChatSessions();
   }, [isOpen]);
 
-  // ✅ Fetch chat sessions
- const fetchChatSessions = async () => {
-  setLoading(true);
-  try {
-    const response = await chatbotAPI.getChatSessions(); // ✅ Fixed
-    setChatSessions(response.data);
-  } catch (error) {
-    console.error("Error fetching chat sessions:", error);
-    setChatSessions([]);
-  } finally {
-    setLoading(false);
-  }
-};
-  // ✅ Delete one chat by ID + show message
+  const fetchChatSessions = async () => {
+    setLoading(true);
+    try {
+      const response = await chatbotAPI.getChatSessions();
+      setChatSessions(response.data);
+    } catch (error) {
+      console.error("Error fetching chat sessions:", error);
+      setChatSessions([]);
+    } finally {
+      setLoading(false);
+    }
+  };
+
   const deleteSession = async (sessionId) => {
     try {
       const confirmed = window.confirm("Are you sure you want to delete this chat?");
       if (!confirmed) return;
 
-       await chatbotAPI.deleteChatSession(sessionId);
+      await chatbotAPI.deleteChatSession(sessionId);
 
       if (onSessionDelete) onSessionDelete(sessionId);
       setShowDeleteMenu(null);
 
-      // ✅ Show success message
       showTemporaryMessage("Chat deleted successfully", "success");
     } catch (error) {
       console.error("Error deleting session:", error);
@@ -70,7 +63,6 @@ const Sidebar = ({
     }
   };
 
-  // ✅ Display message for 3 seconds
   const showTemporaryMessage = (text, type) => {
     setMessage({ text, type });
     setTimeout(() => setMessage({ text: "", type: "" }), 3000);
@@ -85,7 +77,6 @@ const Sidebar = ({
     if (window.innerWidth < 1024) onClose();
   };
 
-  // Format last update time
   const formatDate = (dateString) => {
     const date = new Date(dateString);
     const now = new Date();
@@ -107,7 +98,6 @@ const Sidebar = ({
     });
   };
 
-  // Mobile overlay
   const MobileOverlay = () => (
     <div
       className="fixed inset-0 bg-black/50 backdrop-blur-sm z-40 lg:hidden"
@@ -115,7 +105,6 @@ const Sidebar = ({
     />
   );
 
-  // Sidebar main content
   const SidebarContent = () => (
     <div className="h-full bg-white/95 backdrop-blur-xl shadow-2xl border-r border-gray-200/50 flex flex-col">
       {/* Header */}
@@ -145,7 +134,7 @@ const Sidebar = ({
         </button>
       </div>
 
-      {/* ✅ Message (success / error) */}
+      {/* Message (success / error) */}
       {message.text && (
         <div
           className={`mx-4 mt-3 text-sm text-center py-2 px-3 rounded-lg ${
@@ -266,12 +255,10 @@ const Sidebar = ({
     <>
       {isOpen && <MobileOverlay />}
 
-      {/* Desktop Sidebar */}
       <div className="hidden lg:flex lg:w-80 lg:flex-shrink-0">
         <SidebarContent />
       </div>
 
-      {/* Mobile Sidebar */}
       <div
         className={`fixed left-0 top-0 h-full w-80 z-50 transform transition-transform duration-300 lg:hidden ${
           isOpen ? "translate-x-0" : "-translate-x-full"

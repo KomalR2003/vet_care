@@ -161,7 +161,7 @@ function App() {
       case 'edit-appointment':
         return <MyAppointments {...commonProps} appointments={appointments} setAppointments={setAppointments} />;
          case 'chatbot':
-      return <ChatbotApp />;
+      return <ChatbotApp setCurrentView={setCurrentView}/>;
       default:
         return <PetOwnerDashboard {...commonProps} pets={pets} appointments={appointments} />;
     }

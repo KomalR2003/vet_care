@@ -5,9 +5,7 @@ import ChatbotSidebar from './ChatbotSidebar';
 import AdminPanel from './AdminPanel';
 import { chatbotAPI } from '../../../api/api'; 
 
-// const API_BASE_URL = import.meta.env.VITE_API_URL || 'http://127.0.0.1:8000';
-
-function ChatbotApp() {
+function ChatbotApp({ setCurrentView }) {  // ✅ ACCEPT setCurrentView prop
   const [messages, setMessages] = useState([]);
   const [sidebarOpen, setSidebarOpen] = useState(false);
   const [adminPanelOpen, setAdminPanelOpen] = useState(false);
@@ -16,7 +14,7 @@ function ChatbotApp() {
   const [refreshTrigger, setRefreshTrigger] = useState(0);
   const [initialLoadDone, setInitialLoadDone] = useState(false);
 
-  // ✅ Create new session automatically ONLY once when the app starts
+  // Create new session automatically ONLY once when the app starts
   useEffect(() => {
     if (!initialLoadDone) {
       handleNewChat();
@@ -33,10 +31,22 @@ function ChatbotApp() {
     setCurrentSessionId(null);
   };
 
-  // ✅ Create a new chat session manually
-   const handleNewChat = async () => {
+  // ✅ BACK TO DASHBOARD FUNCTION
+  const handleNavigateBack = () => {
+    console.log('Back button clicked!'); 
+    if (setCurrentView) {
+      console.log('Navigating to dashboard'); 
+      setCurrentView('dashboard');
+    } else {
+      console.error('setCurrentView prop not provided!');
+      alert('Navigation not configured. Please pass setCurrentView prop to ChatbotApp');
+    }
+  };
+
+  // Create a new chat session manually
+  const handleNewChat = async () => {
     try {
-      const response = await chatbotAPI.createNewChat('New Chat'); // ✅ Fixed
+      const response = await chatbotAPI.createNewChat('New Chat');
       const newSessionId = response.data.session_id;
       setMessages([]);
       setCurrentSessionId(newSessionId);
@@ -51,14 +61,27 @@ function ChatbotApp() {
     }
   };
 
-  // ✅ Select an existing chat
-   const handleSessionSelect = async (sessionId) => {
+  // Select an existing chat
+  const handleSessionSelect = async (sessionId) => {
     if (sessionId === currentSessionId) return;
 
     setLoading(true);
     try {
-      const response = await chatbotAPI.getChatSession(sessionId); // ✅ Fixed
-      // ... rest same
+      const response = await chatbotAPI.getChatSession(sessionId);
+      const sessionData = response.data;
+      
+      // Load messages from session
+      if (sessionData.messages && Array.isArray(sessionData.messages)) {
+        setMessages(sessionData.messages);
+      } else {
+        setMessages([]);
+      }
+      
+      setCurrentSessionId(sessionId);
+      
+      if (window.innerWidth < 1024) {
+        setSidebarOpen(false);
+      }
     } catch (error) {
       console.error('Error loading session:', error);
       setMessages([]);
@@ -68,19 +91,17 @@ function ChatbotApp() {
     }
   };
 
-
-  // ✅ When message is sent, refresh sidebar timestamps
+  // When message is sent, refresh sidebar timestamps
   const handleMessageSent = () => {
     setRefreshTrigger((prev) => prev + 1);
   };
 
-  // ✅ When chat is deleted, do NOT create new one automatically
+  // When chat is deleted
   const handleSessionDelete = (deletedSessionId) => {
     if (deletedSessionId === currentSessionId) {
       setMessages([]);
       setCurrentSessionId(null);
     }
-    // only refresh sidebar
     setRefreshTrigger((prev) => prev + 1);
   };
 
@@ -111,15 +132,15 @@ function ChatbotApp() {
         />
 
         {/* Main Content Area */}
-        <div className="flex-1 flex flex-col lg:ml-24">
-          {/* Header (mobile) */}
-          <div className="lg:hidden">
-            <ChatbotHeader onToggleSidebar={() => setSidebarOpen(!sidebarOpen)} />
-          </div>
+         <div className="flex-1 flex flex-col lg:ml-28">
+          
+          <ChatbotHeader 
+            onNavigateBack={handleNavigateBack}
+          />
 
           {/* Chat Section */}
-          <div className="flex-1 p-4 overflow-hidden">
-            <div className="h-full max-w-[77rem] mx-auto">
+         <div className="flex-1 overflow-hidden">
+            <div className="h-full max-w-[85rem] mx-auto px-5">
               <ChatSection
                 messages={messages}
                 onAddMessage={addMessage}
