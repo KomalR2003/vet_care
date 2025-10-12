@@ -5,7 +5,7 @@ import ChatbotSidebar from './ChatbotSidebar';
 import AdminPanel from './AdminPanel';
 import { chatbotAPI } from '../../../api/api'; 
 
-function ChatbotApp({ setCurrentView }) {  // ✅ ACCEPT setCurrentView prop
+function ChatbotApp({ setCurrentView }) {
   const [messages, setMessages] = useState([]);
   const [sidebarOpen, setSidebarOpen] = useState(false);
   const [adminPanelOpen, setAdminPanelOpen] = useState(false);
@@ -132,14 +132,17 @@ function ChatbotApp({ setCurrentView }) {  // ✅ ACCEPT setCurrentView prop
         />
 
         {/* Main Content Area */}
-         <div className="flex-1 flex flex-col lg:ml-28">
+        <div className="flex-1 flex flex-col lg:ml-28">
           
-          <ChatbotHeader 
-            onNavigateBack={handleNavigateBack}
-          />
+          {/* ✅ Only show header when admin panel is NOT open */}
+          {!adminPanelOpen && (
+            <ChatbotHeader 
+              onNavigateBack={handleNavigateBack}
+            />
+          )}
 
           {/* Chat Section */}
-         <div className="flex-1 overflow-hidden">
+          <div className="flex-1 overflow-hidden">
             <div className="h-full max-w-[85rem] mx-auto px-5">
               <ChatSection
                 messages={messages}
