@@ -14,7 +14,8 @@ import {
   BarChart3,
   Settings,
   ChevronDown,
-  ChevronRight
+  ChevronRight,
+  Bot
 } from 'lucide-react';
 
 const AppSidebar = ({ user, setCurrentView, setUser, currentView, isSidebarOpen, setIsSidebarOpen }) => {
@@ -91,7 +92,12 @@ const AppSidebar = ({ user, setCurrentView, setUser, currentView, isSidebarOpen,
             { id: 'vaccination-records', label: 'Vaccination Records' },
             { id: 'prescriptions', label: 'Prescriptions' }
           ]
-        }
+        },
+         { 
+      id: 'chatbot', 
+      label: 'AI Pet Assistant', 
+      icon: Bot 
+    }
       ];
     } else {
       // Default navigation (fallback)

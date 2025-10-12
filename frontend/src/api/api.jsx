@@ -1,6 +1,7 @@
 import axios from 'axios';
 
 const API_BASE_URL = 'http://localhost:5000/api';
+const CHATBOT_API_BASE_URL = 'http://127.0.0.1:8000'; 
 
 // Create axios instance with default config
 const api = axios.create({
@@ -52,6 +53,40 @@ api.interceptors.response.use(
     return Promise.reject(error);
   }
 );
+
+// ========================================
+// 🤖 Chatbot API (FastAPI - Port 8000)
+// ========================================
+
+const chatbotApi = axios.create({
+  baseURL: CHATBOT_API_BASE_URL,
+  timeout: 360000, // Longer timeout for AI responses
+});
+
+// Chatbot request interceptor
+chatbotApi.interceptors.request.use(
+  (config) => {
+    console.log(`Chatbot: ${config.method?.toUpperCase()} ${config.url}`);
+    return config;
+  },
+  (error) => {
+    console.error('Chatbot request error:', error);
+    return Promise.reject(error);
+  }
+);
+
+// Chatbot response interceptor
+chatbotApi.interceptors.response.use(
+  (response) => {
+    console.log(`Chatbot response:`, response.status);
+    return response;
+  },
+  (error) => {
+    console.error('Chatbot response error:', error.response?.data || error.message);
+    return Promise.reject(error);
+  }
+);
+
 
 // Auth API
 export const authAPI = {
@@ -171,6 +206,80 @@ export const reportsAPI = {
       console.error('Error downloading PDF:', error);
       throw error;
     }
+  }
+};
+
+// ========================================
+// 🤖 CHATBOT API (FastAPI - Port 8000)
+// ========================================
+
+export const chatbotAPI = {
+  // Test connection
+  testConnection: () => chatbotApi.get('/test'),
+
+  // Chat session management
+  createNewChat: async (title = "New Chat") => {
+    return chatbotApi.post('/chat/new', { title });
+  },
+
+  getChatSessions: async () => {
+    return chatbotApi.get('/chat/sessions');
+  },
+
+  getChatSession: async (sessionId) => {
+    return chatbotApi.get(`/chat/${sessionId}`);
+  },
+
+  deleteChatSession: async (sessionId) => {
+    if (!sessionId) throw new Error("Session ID is missing");
+    return chatbotApi.delete(`/chat/${sessionId}`);
+  },
+
+  // Ask question
+  askQuestion: async (question, sessionId = null) => {
+    const formData = new FormData();
+    formData.append('question', question);
+    if (sessionId) {
+      formData.append('session_id', sessionId);
+    }
+
+    return chatbotApi.post('/ask/', formData, {
+      headers: {
+        'Content-Type': 'multipart/form-data',
+      },
+    });
+  },
+
+  // Admin panel - Upload PDFs
+  uploadPDFs: async (adminKey, files) => {
+    const formData = new FormData();
+    formData.append('admin_key', adminKey);
+    files.forEach((file) => {
+      formData.append('files', file);
+    });
+
+    return chatbotApi.post('/admin/upload_pdfs/', formData, {
+      headers: {
+        'Content-Type': 'multipart/form-data',
+      },
+    });
+  },
+
+  // Admin panel - Get stats
+  getStats: (adminKey) => {
+    return chatbotApi.get(`/admin/stats/?admin_key=${encodeURIComponent(adminKey)}`);
+  },
+
+  // Admin panel - Get PDFs
+  getPDFs: (adminKey) => {
+    return chatbotApi.get(`/admin/pdfs/?admin_key=${encodeURIComponent(adminKey)}`);
+  },
+
+  // Admin panel - Delete PDF
+  deletePDF: (filename, adminKey) => {
+    return chatbotApi.delete(
+      `/admin/delete_file/?filename=${encodeURIComponent(filename)}&admin_key=${encodeURIComponent(adminKey)}`
+    );
   }
 };
 

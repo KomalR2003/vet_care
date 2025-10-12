@@ -23,6 +23,8 @@ import Reports from './pages/Doctor/Reports';
 import MyAppointmentsDoctor from './pages/Doctor/MyAppointments';
 import Settings from './pages/Doctor/Settings';
 
+import ChatbotApp from './pages/PetOwner/Chatbot/ChatbotPage';
+
 function App() {
   const [currentView, setCurrentView] = useState('login');
   const [user, setUser] = useState(null);
@@ -158,6 +160,8 @@ function App() {
         return <MyPets {...commonProps} pets={pets} setPets={setPets} />;
       case 'edit-appointment':
         return <MyAppointments {...commonProps} appointments={appointments} setAppointments={setAppointments} />;
+         case 'chatbot':
+      return <ChatbotApp />;
       default:
         return <PetOwnerDashboard {...commonProps} pets={pets} appointments={appointments} />;
     }
