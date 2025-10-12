@@ -5,7 +5,7 @@ import {
   Eye, EyeOff, RefreshCw
 } from 'lucide-react';
 
-import { chatbotAPI } from '../../../../api/api';
+import { chatbotAPI } from '../../../api/api';
 
 const AdminPanel = ({ isOpen, onClose }) => {
   const [adminKey, setAdminKey] = useState('');

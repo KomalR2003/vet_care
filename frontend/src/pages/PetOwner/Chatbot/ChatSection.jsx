@@ -1,6 +1,6 @@
 import React, { useState, useRef, useEffect } from 'react';
 import { Send, Bot, User, Sparkles } from 'lucide-react';
-import { chatbotAPI } from '../../../../api/api'; // ✅ Fixed import
+import { chatbotAPI } from '../../../api/api';
 
 const ChatSection = ({ messages, onAddMessage, currentSessionId, onNewChat, loading, onMessageSent }) => {
   const [input, setInput] = useState('');

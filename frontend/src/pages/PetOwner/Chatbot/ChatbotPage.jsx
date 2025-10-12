@@ -1,9 +1,8 @@
 import React, { useState, useEffect } from 'react';
-import './ChatbotApp.css';
-import ChatbotHeader from './components/ChatbotHeader';
-import ChatSection from './components/ChatSection';
-import ChatbotSidebar from './components/ChatbotSidebar'; 
-import AdminPanel from './components/AdminPanel';
+import ChatbotHeader from './ChatbotHeader';
+import ChatSection from './ChatSection';
+import ChatbotSidebar from './ChatbotSidebar';
+import AdminPanel from './AdminPanel';
 import { chatbotAPI } from '../../../api/api'; 
 
 // const API_BASE_URL = import.meta.env.VITE_API_URL || 'http://127.0.0.1:8000';
