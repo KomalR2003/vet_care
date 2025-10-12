@@ -7,7 +7,7 @@ import ManagePetOwners from './pages/Admin/UserManagement/ManagePetOwners';
 import ManageDoctors from './pages/Admin/UserManagement/ManageDoctors';
 import AllAppointments from './pages/Admin/AppointmentOversight/AllAppointments';
 import AllPets from './pages/Admin/PetManagement/AllPets';
-import MedicalHistory from './pages/Admin/PetManagement/MedicalHistory';
+
 import DiseaseAnalysis from './pages/Admin/ReportsAnalytics/DiseaseAnalysis';
 import PetOwnerDashboard from './pages/PetOwner/PetOwnerDashboard';
 import DoctorDashboard from './pages/Doctor/DoctorDashboard';
@@ -16,7 +16,7 @@ import AddPetForm from './components/AddPetForm';
 import BookAppointmentForm from './components/BookAppointmentForm';
 
 import MyPets from './pages/PetOwner/MyPets';
-import MyAppointments from './pages/PetOwner/MyAppointments';
+import MyAppointments from './pages/PetOwner/Appointments/MyAppointments';
 
 import PatientHistory from './pages/Doctor/PatientHistory';
 import Reports from './pages/Doctor/Reports';
@@ -116,8 +116,6 @@ function App() {
         return <AllAppointments {...adminProps} />;
       case 'all-pets':
         return <AllPets {...adminProps} />;
-      case 'medical-history':
-        return <MedicalHistory {...adminProps} />;
       case 'reports-analytics':
         return <DiseaseAnalysis {...adminProps} />;    
       default:

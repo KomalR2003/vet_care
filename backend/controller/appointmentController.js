@@ -1,17 +1,35 @@
 const Appointment = require('../models/Appointment');
-const Doctor = require('../models/Doctor');   // ⬅️ add this
-const Pet = require('../models/Pet');         // ⬅️ if Appointment has pet
-const User = require('../models/User');     
+const Doctor = require('../models/Doctor');
+const Pet = require('../models/Pet');
+const User = require('../models/User');
 
 exports.createAppointment = async (req, res) => {
   try {
     const appointmentData = {
       ...req.body,
-      owner: req.user._id // Add the logged-in user as owner
+      owner: req.user._id
     };
     const appointment = new Appointment(appointmentData);
     await appointment.save();
-    res.status(201).json(appointment);
+    
+    // Populate the appointment before sending
+    const populatedAppointment = await Appointment.findById(appointment._id)
+      .populate('pet')
+      .populate('owner', 'name email')
+      .populate({
+        path: 'doctor',
+        populate: { path: 'userId', select: 'name email' }
+      });
+    
+    // Transform to include flat petName and doctorName
+    const aptObj = populatedAppointment.toObject();
+    const transformedAppointment = {
+      ...aptObj,
+      petName: aptObj.pet?.name || 'Unknown Pet',
+      doctorName: aptObj.doctor?.userId?.name || 'Unknown Doctor'
+    };
+    
+    res.status(201).json(transformedAppointment);
   } catch (err) {
     res.status(400).json({ error: err.message });
   }
@@ -34,13 +52,25 @@ exports.getAppointments = async (req, res) => {
     }
 
     const appointments = await Appointment.find(query)
-      .populate('pet owner report')
+      .populate('pet')
+      .populate('owner', 'name email')
       .populate({
         path: 'doctor',
-        populate: { path: 'userId', select: 'name' } // <- get doctor's name
-      });
+        populate: { path: 'userId', select: 'name email' }
+      })
+      .populate('report');
 
-    res.json(appointments);
+    // Transform appointments to include flat petName and doctorName
+    const transformedAppointments = appointments.map(apt => {
+      const aptObj = apt.toObject();
+      return {
+        ...aptObj,
+        petName: aptObj.pet?.name || 'Unknown Pet',
+        doctorName: aptObj.doctor?.userId?.name || 'Unknown Doctor'
+      };
+    });
+
+    res.json(transformedAppointments);
   } catch (err) {
     res.status(500).json({ error: err.message });
   }
@@ -49,14 +79,24 @@ exports.getAppointments = async (req, res) => {
 exports.getAppointmentById = async (req, res) => {
   try {
     const appointment = await Appointment.findById(req.params.id)
-      .populate('pet owner report')
+      .populate('pet')
+      .populate('owner', 'name email')
       .populate({
         path: 'doctor',
-        populate: { path: 'userId', select: 'name' } // <- get doctor's name
-      });
+        populate: { path: 'userId', select: 'name email' }
+      })
+      .populate('report');
 
     if (!appointment) return res.status(404).json({ error: 'Appointment not found' });
-    res.json(appointment);
+    
+    const aptObj = appointment.toObject();
+    const transformedAppointment = {
+      ...aptObj,
+      petName: aptObj.pet?.name || 'Unknown Pet',
+      doctorName: aptObj.doctor?.userId?.name || 'Unknown Doctor'
+    };
+    
+    res.json(transformedAppointment);
   } catch (err) {
     res.status(500).json({ error: err.message });
   }
@@ -64,9 +104,24 @@ exports.getAppointmentById = async (req, res) => {
 
 exports.updateAppointment = async (req, res) => {
   try {
-    const appointment = await Appointment.findByIdAndUpdate(req.params.id, req.body, { new: true });
+    const appointment = await Appointment.findByIdAndUpdate(req.params.id, req.body, { new: true })
+      .populate('pet')
+      .populate('owner', 'name email')
+      .populate({
+        path: 'doctor',
+        populate: { path: 'userId', select: 'name email' }
+      });
+      
     if (!appointment) return res.status(404).json({ error: 'Appointment not found' });
-    res.json(appointment);
+    
+    const aptObj = appointment.toObject();
+    const transformedAppointment = {
+      ...aptObj,
+      petName: aptObj.pet?.name || 'Unknown Pet',
+      doctorName: aptObj.doctor?.userId?.name || 'Unknown Doctor'
+    };
+    
+    res.json(transformedAppointment);
   } catch (err) {
     res.status(400).json({ error: err.message });
   }
@@ -77,7 +132,6 @@ exports.deleteAppointment = async (req, res) => {
     const appointment = await Appointment.findById(req.params.id);
     if (!appointment) return res.status(404).json({ error: 'Appointment not found' });
     
-    // Check if user owns this appointment (for pet owners) or is admin/doctor
     if (req.user.role === 'pet owner' && appointment.owner.toString() !== req.user._id.toString()) {
       return res.status(403).json({ error: 'Not authorized to delete this appointment' });
     }
@@ -95,9 +149,24 @@ exports.confirmAppointment = async (req, res) => {
       req.params.id,
       { status: 'confirmed' },
       { new: true }
-    );
+    )
+      .populate('pet')
+      .populate('owner', 'name email')
+      .populate({
+        path: 'doctor',
+        populate: { path: 'userId', select: 'name email' }
+      });
+      
     if (!appointment) return res.status(404).json({ error: 'Appointment not found' });
-    res.json(appointment);
+    
+    const aptObj = appointment.toObject();
+    const transformedAppointment = {
+      ...aptObj,
+      petName: aptObj.pet?.name || 'Unknown Pet',
+      doctorName: aptObj.doctor?.userId?.name || 'Unknown Doctor'
+    };
+    
+    res.json(transformedAppointment);
   } catch (err) {
     res.status(400).json({ error: err.message });
   }
@@ -109,9 +178,24 @@ exports.cancelAppointment = async (req, res) => {
       req.params.id,
       { status: 'cancelled' },
       { new: true }
-    );
+    )
+      .populate('pet')
+      .populate('owner', 'name email')
+      .populate({
+        path: 'doctor',
+        populate: { path: 'userId', select: 'name email' }
+      });
+      
     if (!appointment) return res.status(404).json({ error: 'Appointment not found' });
-    res.json(appointment);
+    
+    const aptObj = appointment.toObject();
+    const transformedAppointment = {
+      ...aptObj,
+      petName: aptObj.pet?.name || 'Unknown Pet',
+      doctorName: aptObj.doctor?.userId?.name || 'Unknown Doctor'
+    };
+    
+    res.json(transformedAppointment);
   } catch (err) {
     res.status(400).json({ error: err.message });
   }
@@ -122,6 +206,7 @@ exports.rescheduleAppointment = async (req, res) => {
     const { newDate, reason } = req.body;
     const appointment = await Appointment.findById(req.params.id);
     if (!appointment) return res.status(404).json({ error: 'Appointment not found' });
+    
     appointment.rescheduleInfo = {
       oldDate: appointment.date,
       newDate,
@@ -130,7 +215,23 @@ exports.rescheduleAppointment = async (req, res) => {
     appointment.date = newDate;
     appointment.status = 'pending';
     await appointment.save();
-    res.json(appointment);
+    
+    const populatedAppointment = await Appointment.findById(appointment._id)
+      .populate('pet')
+      .populate('owner', 'name email')
+      .populate({
+        path: 'doctor',
+        populate: { path: 'userId', select: 'name email' }
+      });
+    
+    const aptObj = populatedAppointment.toObject();
+    const transformedAppointment = {
+      ...aptObj,
+      petName: aptObj.pet?.name || 'Unknown Pet',
+      doctorName: aptObj.doctor?.userId?.name || 'Unknown Doctor'
+    };
+    
+    res.json(transformedAppointment);
   } catch (err) {
     res.status(400).json({ error: err.message });
   }

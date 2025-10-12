@@ -136,12 +136,7 @@ const Login = ({ onLogin, setCurrentView }) => {
           </p>
         </div>
 
-        {/* Demo Credentials (Optional - remove in production) */}
-        <div className="mt-6 p-4 bg-gray-50 rounded-lg">
-          <p className="text-xs text-gray-600 text-center mb-2">Demo Credentials:</p>
-          <p className="text-xs text-gray-500 text-center">Pet Owner: owner@test.com / password</p>
-          <p className="text-xs text-gray-500 text-center">Doctor: doctor@test.com / password</p>
-        </div>
+       
       </div>
     </div>
   );
