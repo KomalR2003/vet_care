@@ -41,7 +41,6 @@ const Reports = ({ user, setCurrentView, setUser, currentView, isSidebarOpen, se
   const fetchAppointments = async () => {
     try {
       const response = await appointmentsAPI.getAppointments();
-      // Filter only completed appointments for report creation
       const completedAppts = response.data.filter(apt => apt.status === 'completed' || apt.status === 'confirmed');
       setAppointments(completedAppts);
     } catch (error) {
@@ -93,7 +92,6 @@ const Reports = ({ user, setCurrentView, setUser, currentView, isSidebarOpen, se
     const [success, setSuccess] = useState(false);
     const [selectedPetAppointments, setSelectedPetAppointments] = useState([]);
 
-    // Filter appointments when pet is selected
     useEffect(() => {
       if (formData.pet) {
         const petAppts = appointments.filter(apt => 
@@ -109,7 +107,7 @@ const Reports = ({ user, setCurrentView, setUser, currentView, isSidebarOpen, se
       setFormData(prev => ({
         ...prev,
         pet: e.target.value,
-        appointment: '' // Reset appointment when pet changes
+        appointment: ''
       }));
     };
 
@@ -158,10 +156,28 @@ const Reports = ({ user, setCurrentView, setUser, currentView, isSidebarOpen, se
           return;
         }
 
+        // Clean up the data - remove empty strings and undefined values
         const reportData = {
-          ...formData,
-          appointment: formData.appointment || undefined // Optional
+          pet: formData.pet,
+          summary: formData.summary,
+          diagnosis: formData.diagnosis || undefined,
+          prescription: formData.prescription || undefined,
+          notes: formData.notes || undefined,
+          medications: formData.medications.length > 0 ? formData.medications : undefined,
+          recommendations: formData.recommendations.length > 0 ? formData.recommendations : undefined
         };
+
+        // Only include appointment if it has a valid value
+        if (formData.appointment && formData.appointment.trim() !== '') {
+          reportData.appointment = formData.appointment;
+        }
+
+        // Remove undefined values from the object
+        Object.keys(reportData).forEach(key => {
+          if (reportData[key] === undefined) {
+            delete reportData[key];
+          }
+        });
 
         await reportsAPI.createReport(reportData);
         setSuccess(true);

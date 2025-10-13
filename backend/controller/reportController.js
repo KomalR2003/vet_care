@@ -9,6 +9,11 @@ exports.createReport = async (req, res) => {
   try {
     const { pet, appointment, summary, diagnosis, prescription, notes, medications, recommendations } = req.body;
     
+    // Basic validation
+    if (!pet || !summary) {
+      return res.status(400).json({ error: 'Pet and summary are required' });
+    }
+
     // Get doctor profile
     const doctorProfile = await Doctor.findOne({ userId: req.user._id }).populate('userId');
     if (!doctorProfile) {
@@ -20,11 +25,15 @@ exports.createReport = async (req, res) => {
     if (!petDetails) {
       return res.status(404).json({ error: 'Pet not found' });
     }
+    // Ensure pet has an owner (data integrity check)
+    if (!petDetails.owner) {
+      return res.status(404).json({ error: 'Pet owner not found' });
+    }
 
     // Create report
     const report = new Report({
       pet,
-      owner: petDetails.owner._id,
+      owner: petDetails.owner, // accept either populated doc or ObjectId
       doctor: doctorProfile._id,
       appointment,
       date: new Date(),
