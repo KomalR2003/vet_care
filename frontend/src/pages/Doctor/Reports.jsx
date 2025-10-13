@@ -1,7 +1,7 @@
 import React, { useState, useEffect } from 'react';
 import AppSidebar from '../../components/AppSidebar';
-import { BarChart3, FileText, Eye, Download, Plus, Calendar, User, Heart, Trash2, AlertCircle, CheckCircle } from 'lucide-react';
-import { reportsAPI, petsAPI } from '../../api/api';
+import { BarChart3, FileText, Eye, Download, Plus, Calendar, User, Heart, Trash2, AlertCircle, CheckCircle, X } from 'lucide-react';
+import { reportsAPI, petsAPI, appointmentsAPI } from '../../api/api';
 
 const Reports = ({ user, setCurrentView, setUser, currentView, isSidebarOpen, setIsSidebarOpen }) => {
   const [reports, setReports] = useState([]);
@@ -10,10 +10,12 @@ const Reports = ({ user, setCurrentView, setUser, currentView, isSidebarOpen, se
   const [selectedReport, setSelectedReport] = useState(null);
   const [showDetailsModal, setShowDetailsModal] = useState(false);
   const [pets, setPets] = useState([]);
+  const [appointments, setAppointments] = useState([]);
 
   useEffect(() => {
     fetchReports();
     fetchPets();
+    fetchAppointments();
   }, []);
 
   const fetchReports = async () => {
@@ -33,6 +35,17 @@ const Reports = ({ user, setCurrentView, setUser, currentView, isSidebarOpen, se
       setPets(response.data);
     } catch (error) {
       console.error('Error fetching pets:', error);
+    }
+  };
+
+  const fetchAppointments = async () => {
+    try {
+      const response = await appointmentsAPI.getAppointments();
+      // Filter only completed appointments for report creation
+      const completedAppts = response.data.filter(apt => apt.status === 'completed' || apt.status === 'confirmed');
+      setAppointments(completedAppts);
+    } catch (error) {
+      console.error('Error fetching appointments:', error);
     }
   };
 
@@ -66,6 +79,7 @@ const Reports = ({ user, setCurrentView, setUser, currentView, isSidebarOpen, se
   const CreateReportModal = () => {
     const [formData, setFormData] = useState({
       pet: '',
+      appointment: '',
       summary: '',
       diagnosis: '',
       prescription: '',
@@ -77,6 +91,27 @@ const Reports = ({ user, setCurrentView, setUser, currentView, isSidebarOpen, se
     const [newRecommendation, setNewRecommendation] = useState('');
     const [submitting, setSubmitting] = useState(false);
     const [success, setSuccess] = useState(false);
+    const [selectedPetAppointments, setSelectedPetAppointments] = useState([]);
+
+    // Filter appointments when pet is selected
+    useEffect(() => {
+      if (formData.pet) {
+        const petAppts = appointments.filter(apt => 
+          (apt.pet?._id === formData.pet || apt.pet === formData.pet)
+        );
+        setSelectedPetAppointments(petAppts);
+      } else {
+        setSelectedPetAppointments([]);
+      }
+    }, [formData.pet]);
+
+    const handlePetChange = (e) => {
+      setFormData(prev => ({
+        ...prev,
+        pet: e.target.value,
+        appointment: '' // Reset appointment when pet changes
+      }));
+    };
 
     const addMedication = () => {
       if (newMedication.name && newMedication.dosage && newMedication.frequency) {
@@ -117,7 +152,18 @@ const Reports = ({ user, setCurrentView, setUser, currentView, isSidebarOpen, se
       setSubmitting(true);
 
       try {
-        await reportsAPI.createReport(formData);
+        if (!formData.pet || !formData.summary) {
+          alert('Please fill in all required fields');
+          setSubmitting(false);
+          return;
+        }
+
+        const reportData = {
+          ...formData,
+          appointment: formData.appointment || undefined // Optional
+        };
+
+        await reportsAPI.createReport(reportData);
         setSuccess(true);
         setTimeout(async () => {
           await fetchReports();
@@ -126,7 +172,7 @@ const Reports = ({ user, setCurrentView, setUser, currentView, isSidebarOpen, se
         }, 1500);
       } catch (error) {
         console.error('Error creating report:', error);
-        alert('Failed to create report');
+        alert('Failed to create report: ' + (error.response?.data?.error || error.message));
         setSubmitting(false);
       }
     };
@@ -145,7 +191,9 @@ const Reports = ({ user, setCurrentView, setUser, currentView, isSidebarOpen, se
                   <p className="text-sm text-gray-500">Document patient examination and treatment</p>
                 </div>
               </div>
-              <button onClick={() => setShowCreateModal(false)} className="text-gray-400 hover:text-gray-600 text-2xl">✕</button>
+              <button onClick={() => setShowCreateModal(false)} className="text-gray-400 hover:text-gray-600 text-2xl">
+                <X className="w-6 h-6" />
+              </button>
             </div>
           </div>
 
@@ -153,27 +201,51 @@ const Reports = ({ user, setCurrentView, setUser, currentView, isSidebarOpen, se
             <div className="p-8 flex flex-col items-center justify-center min-h-[400px]">
               <CheckCircle className="w-16 h-16 text-green-500 mb-4" />
               <h3 className="text-2xl font-bold text-gray-800 mb-2">Report Created Successfully!</h3>
-              <p className="text-gray-600">The medical report has been saved to the system.</p>
+              <p className="text-gray-600">The medical report has been saved and is available to the pet owner.</p>
             </div>
           ) : (
             <div className="p-6 space-y-6 max-h-[70vh] overflow-y-auto">
-              <div>
-                <label className="block text-sm font-medium text-gray-700 mb-2">
-                  Select Pet <span className="text-red-500">*</span>
-                </label>
-                <select
-                  value={formData.pet}
-                  onChange={(e) => setFormData({ ...formData, pet: e.target.value })}
-                  className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent"
-                  required
-                >
-                  <option value="">Select a pet...</option>
-                  {pets.map(pet => (
-                    <option key={pet._id} value={pet._id}>
-                      {pet.name} - {pet.species} ({pet.breed})
-                    </option>
-                  ))}
-                </select>
+              <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                <div>
+                  <label className="block text-sm font-medium text-gray-700 mb-2">
+                    Select Pet <span className="text-red-500">*</span>
+                  </label>
+                  <select
+                    value={formData.pet}
+                    onChange={handlePetChange}
+                    className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent"
+                    required
+                  >
+                    <option value="">Choose a pet...</option>
+                    {pets.map(pet => (
+                      <option key={pet._id} value={pet._id}>
+                        {pet.name} - {pet.species} ({pet.breed})
+                      </option>
+                    ))}
+                  </select>
+                </div>
+
+                <div>
+                  <label className="block text-sm font-medium text-gray-700 mb-2">
+                    Link to Appointment (Optional)
+                  </label>
+                  <select
+                    value={formData.appointment}
+                    onChange={(e) => setFormData({ ...formData, appointment: e.target.value })}
+                    className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent"
+                    disabled={!formData.pet}
+                  >
+                    <option value="">No appointment link</option>
+                    {selectedPetAppointments.map(apt => (
+                      <option key={apt._id} value={apt._id}>
+                        {new Date(apt.date).toLocaleDateString()} - {apt.time} ({apt.reason})
+                      </option>
+                    ))}
+                  </select>
+                  {!formData.pet && (
+                    <p className="text-xs text-gray-500 mt-1">Select a pet first to see appointments</p>
+                  )}
+                </div>
               </div>
 
               <div>
@@ -372,7 +444,9 @@ const Reports = ({ user, setCurrentView, setUser, currentView, isSidebarOpen, se
           <div className="sticky top-0 bg-white border-b p-6">
             <div className="flex justify-between items-center">
               <h2 className="text-2xl font-bold text-gray-800">Report Details</h2>
-              <button onClick={() => setShowDetailsModal(false)} className="text-gray-400 hover:text-gray-600 text-2xl">✕</button>
+              <button onClick={() => setShowDetailsModal(false)} className="text-gray-400 hover:text-gray-600 text-2xl">
+                <X className="w-6 h-6" />
+              </button>
             </div>
           </div>
 

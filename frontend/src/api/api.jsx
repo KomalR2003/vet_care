@@ -157,7 +157,9 @@ export const doctorsAPI = {
   updateSettings: (settingsData) => api.put('/doctors/settings', settingsData)
 };
 
-// Reports API
+// ========================================
+// 📄 REPORTS API - COMPLETE IMPLEMENTATION
+// ========================================
 export const reportsAPI = {
   // Get all reports (filtered by user role on backend)
   getReports: () => api.get('/reports'),
