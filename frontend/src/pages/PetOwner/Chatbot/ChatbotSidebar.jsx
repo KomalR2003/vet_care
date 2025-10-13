@@ -225,13 +225,7 @@ const Sidebar = ({
       {/* Footer */}
       <div className="p-4 border-t border-gray-200/50 bg-gradient-to-r from-gray-50/50 to-blue-50/50 flex-shrink-0">
         <div className="space-y-3">
-          <button
-            onClick={onOpenAdminPanel}
-            className="w-full flex items-center space-x-3 px-4 py-3 rounded-xl transition-all duration-200 hover:bg-purple-50 text-purple-600 border border-purple-200/50 hover:shadow-lg hover:scale-105 active:scale-95"
-          >
-            <Shield className="w-5 h-5" />
-            <span className="font-medium">Admin Panel</span>
-          </button>
+         
         </div>
 
         <div className="mt-4 bg-gradient-to-br from-blue-50 to-purple-50 p-4 rounded-2xl border border-gray-200/50 shadow-lg">

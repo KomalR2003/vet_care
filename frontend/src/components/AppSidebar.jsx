@@ -15,7 +15,8 @@ import {
   Settings,
   ChevronDown,
   ChevronRight,
-  Bot
+  Bot,
+  Database
 } from 'lucide-react';
 
 const AppSidebar = ({ user, setCurrentView, setUser, currentView, isSidebarOpen, setIsSidebarOpen }) => {
@@ -54,6 +55,11 @@ const AppSidebar = ({ user, setCurrentView, setUser, currentView, isSidebarOpen,
           id: 'reports-analytics', 
           label: 'Reports & Analytics', 
           icon: BarChart3,
+        },
+        { 
+          id: 'chatbot-admin', 
+          label: 'Chatbot Admin', 
+          icon: Database,
         }     
       ];
     } else if (user?.role === 'doctor') {

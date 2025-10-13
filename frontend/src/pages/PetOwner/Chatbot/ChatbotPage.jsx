@@ -2,7 +2,7 @@ import React, { useState, useEffect } from 'react';
 import ChatbotHeader from './ChatbotHeader';
 import ChatSection from './ChatSection';
 import ChatbotSidebar from './ChatbotSidebar';
-import AdminPanel from './AdminPanel';
+import AdminPanel from '../../Admin/ChatbotAdmin/AdminPanel';
 import { chatbotAPI } from '../../../api/api'; 
 
 function ChatbotApp({ setCurrentView }) {

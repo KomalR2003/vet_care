@@ -24,6 +24,7 @@ import MyAppointmentsDoctor from './pages/Doctor/MyAppointments';
 import Settings from './pages/Doctor/Settings';
 
 import ChatbotApp from './pages/PetOwner/Chatbot/ChatbotPage';
+import ChatbotAdminPanel from './pages/Admin/ChatbotAdmin/ChatbotAdminPanel';
 
 function App() {
   const [currentView, setCurrentView] = useState('login');
@@ -119,7 +120,9 @@ function App() {
       case 'all-pets':
         return <AllPets {...adminProps} />;
       case 'reports-analytics':
-        return <DiseaseAnalysis {...adminProps} />;    
+        return <DiseaseAnalysis {...adminProps} />; 
+        case 'chatbot-admin':  
+      return <ChatbotAdminPanel {...adminProps} />;   
       default:
         return <AdminDashboard {...adminProps} />;
     }
