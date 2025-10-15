@@ -1,6 +1,6 @@
 import React, { useState } from 'react';
 import AppSidebar from '../../../components/AppSidebar';
-import { Calendar, Eye, Edit, Trash2, User, Heart, CheckCircle, XCircle, Clock } from 'lucide-react';
+import { Calendar, Eye, Trash2, User, Heart, CheckCircle, XCircle, Clock } from 'lucide-react';
 import { appointmentsAPI } from '../../../api/api';
 
 const MyAppointments = ({ 
@@ -19,11 +19,6 @@ const MyAppointments = ({
   const handleViewAppointment = (appointment) => {
     setSelectedAppointment(appointment);
     setShowDetails(true);
-  };
-
-  const handleEditAppointment = (appointment) => {
-    // Navigate to edit appointment page
-    setCurrentView('edit-appointment');
   };
 
   const handleDeleteAppointment = async (appointmentId) => {
@@ -164,17 +159,6 @@ const MyAppointments = ({
 
             {/* Actions */}
             <div className="flex justify-end space-x-3 mt-6 pt-6 border-t">
-              {selectedAppointment.status === 'pending' && (
-                <button
-                  onClick={() => {
-                    setShowDetails(false);
-                    handleEditAppointment(selectedAppointment);
-                  }}
-                  className="px-4 py-2 bg-blue-600 text-white rounded-lg hover:bg-blue-700"
-                >
-                  Edit Appointment
-                </button>
-              )}
               <button
                 onClick={() => setShowDetails(false)}
                 className="px-4 py-2 text-gray-600 border border-gray-300 rounded-lg hover:bg-gray-50"
@@ -295,15 +279,6 @@ const MyAppointments = ({
                             >
                               <Eye className="w-4 h-4" />
                             </button>
-                            {appointment.status === 'pending' && (
-                              <button 
-                                onClick={() => handleEditAppointment(appointment)}
-                                className="text-green-600 hover:text-green-900 p-1" 
-                                title="Edit Appointment"
-                              >
-                                <Edit className="w-4 h-4" />
-                              </button>
-                            )}
                             <button 
                               onClick={() => handleDeleteAppointment(appointment._id)}
                               className="text-red-600 hover:text-red-900 p-1" 

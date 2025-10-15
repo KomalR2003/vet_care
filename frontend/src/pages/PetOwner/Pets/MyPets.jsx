@@ -54,10 +54,9 @@ const MyPets = ({ user, pets, setCurrentView, setUser, currentView, isSidebarOpe
         <td className="px-10  whitespace-nowrap">{pet.species}</td>
         <td className="px-10  whitespace-nowrap">{pet.breed}</td>
         <td className="px-10  whitespace-nowrap">{pet.age}</td>
-        {/* ✅ FIX: put actions in their own td */}
+
         <td className="px-10  whitespace-nowrap flex space-x-3">
           <Eye className="w-5 h-5  cursor-pointer text-blue-600" />
-          <Edit className="w-5 h-5  cursor-pointer text-green-600" />
           <Trash2 className="w-5 h-5  cursor-pointer text-red-600" />
         </td>
       </tr>

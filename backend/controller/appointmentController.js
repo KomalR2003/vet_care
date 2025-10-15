@@ -143,6 +143,28 @@ exports.deleteAppointment = async (req, res) => {
   }
 };
 
+exports.deleteAllAppointments = async (req, res) => {
+  try {
+    const confirmDelete = req.body?.confirmDelete;
+    
+    if (!confirmDelete) {
+      return res.status(400).json({ 
+        error: 'Confirmation required. Send { "confirmDelete": true }' 
+      });
+    }
+    
+    const result = await Appointment.deleteMany({});
+    
+    res.json({ 
+      message: 'All appointments deleted successfully',
+      deletedCount: result.deletedCount 
+    });
+  } catch (err) {
+    res.status(500).json({ error: err.message });
+  }
+};
+
+
 exports.confirmAppointment = async (req, res) => {
   try {
     const appointment = await Appointment.findByIdAndUpdate(

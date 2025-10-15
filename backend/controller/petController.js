@@ -83,6 +83,27 @@ exports.deletePet = async (req, res) => {
   }
 };
 
+exports.deleteAllPets = async (req, res) => {
+  try {
+    // Temporarily comment out role check for testing
+    // if (req.user.role !== 'admin') {
+    //   return res.status(403).json({ error: 'Not authorized' });
+    // }
+    
+    if (!req.body.confirmDelete) {
+      return res.status(400).json({ error: 'Confirmation required' });
+    }
+    
+    const result = await Pet.deleteMany({});
+    res.json({ 
+      message: 'All pets deleted successfully',
+      deletedCount: result.deletedCount 
+    });
+  } catch (err) {
+    res.status(500).json({ error: err.message });
+  }
+};
+
 exports.getPetHistory = async (req, res) => {
   try {
     const pet = await Pet.findById(req.params.id).populate('reports');

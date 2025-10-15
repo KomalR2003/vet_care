@@ -86,10 +86,10 @@ const DoctorDashboard = ({
         <div className="flex justify-between items-center mb-6">
           <div>
             <h1 className="text-3xl font-bold text-gray-800">
-              Doctor Dashboard
+              Admin Dashboard
             </h1>
             <p className="text-gray-600">
-              Welcome back, {user?.name || "Doctor"}
+              Welcome back, {user?.name || "Admin"}
             </p>
           </div>
         </div>
@@ -223,7 +223,7 @@ const DoctorDashboard = ({
                   >
                     <div>
                       <p className="font-medium text-gray-800">
-                        Booked by {a.doctorName || "Unknown Doctor"} for {a.pet?.name || "Unknown Pet"}
+                        Booked by {a.owner?.name  || "Unknown Owner"} for {a.pet?.name || "Unknown Pet"}
                       </p>
                       <p className="text-xs text-gray-500">
                         {new Date(a.date).toLocaleDateString()} at{" "}

@@ -1,4 +1,5 @@
 const User = require('../models/User');
+const Doctor = require('../models/Doctor');
 const bcrypt = require('bcryptjs');
 const jwt = require('jsonwebtoken');
 
@@ -17,6 +18,22 @@ exports.register = async (req, res) => {
 
     const user = new User(userData);
     await user.save();
+
+    // If user is a doctor, create a Doctor profile
+    if (role === 'doctor') {
+      const doctorData = {
+        userId: user._id,
+        specialization: specialization || 'General Practice',
+        experience: 0,
+        consultation_fee: 0,
+        available_days: [],
+        available_times: [],
+        bio: '',
+        isVerified: false
+      };
+      const doctor = new Doctor(doctorData);
+      await doctor.save();
+    }
 
     const token = jwt.sign(
       { userId: user._id, role: user.role },

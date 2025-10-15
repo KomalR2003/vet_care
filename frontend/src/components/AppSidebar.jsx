@@ -19,7 +19,7 @@ import {
   Database
 } from 'lucide-react';
 
-const AppSidebar = ({ user, setCurrentView, setUser, currentView, isSidebarOpen, setIsSidebarOpen }) => {
+const AppSidebar = ({ user, setCurrentView, setUser, currentView, isSidebarOpen, setIsSidebarOpen, handleLogout }) => {
   // State to track which parent menu is expanded
   const [expandedMenu, setExpandedMenu] = useState(null);
 
@@ -55,6 +55,9 @@ const AppSidebar = ({ user, setCurrentView, setUser, currentView, isSidebarOpen,
           id: 'reports-analytics', 
           label: 'Reports & Analytics', 
           icon: BarChart3,
+          subItems: [
+            { id: 'admin-reports', label: 'Medical Reports' },
+          ]
         },
         { 
           id: 'chatbot-admin', 
@@ -94,9 +97,7 @@ const AppSidebar = ({ user, setCurrentView, setUser, currentView, isSidebarOpen,
           label: 'Reports & Health',
           icon: FileText,
           subItems: [
-            { id: 'health-records', label: 'Health Records' },
-            { id: 'vaccination-records', label: 'Vaccination Records' },
-            { id: 'prescriptions', label: 'Prescriptions' }
+            { id: 'medical-reports', label: 'Medical Reports' },
           ]
         },
          { 
@@ -118,11 +119,12 @@ const AppSidebar = ({ user, setCurrentView, setUser, currentView, isSidebarOpen,
 
   const navigationItems = getNavigationItems();
 
-  const handleLogout = () => {
+  // Use the handleLogout from parent component if provided, otherwise use local logout
+  const logout = handleLogout || (() => {
     setUser(null);
     localStorage.removeItem('token');
     setCurrentView('login');
-  };
+  });
 
   const handleNavigation = (view) => {
     setCurrentView(view);
@@ -269,7 +271,7 @@ const AppSidebar = ({ user, setCurrentView, setUser, currentView, isSidebarOpen,
         {/* Logout Button */}
         <div className="absolute bottom-4 left-0 right-0 p-4">
           <button
-            onClick={handleLogout}
+            onClick={logout}
             className="w-full flex items-center space-x-3 px-3 py-2 rounded-lg text-sm font-medium text-red-600 hover:bg-red-50 transition-colors"
           >
             <LogOut className="w-5 h-5" />

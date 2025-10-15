@@ -15,9 +15,21 @@ exports.createReport = async (req, res) => {
     }
 
     // Get doctor profile
-    const doctorProfile = await Doctor.findOne({ userId: req.user._id }).populate('userId');
+    let doctorProfile = await Doctor.findOne({ userId: req.user._id }).populate('userId');
     if (!doctorProfile) {
-      return res.status(404).json({ error: 'Doctor profile not found' });
+      // Create a default doctor profile if it doesn't exist
+      doctorProfile = new Doctor({
+        userId: req.user._id,
+        specialization: 'General Practice',
+        experience: 0,
+        consultation_fee: 0,
+        available_days: [],
+        available_times: [],
+        bio: '',
+        isVerified: false
+      });
+      await doctorProfile.save();
+      await doctorProfile.populate('userId');
     }
 
     // Get pet details

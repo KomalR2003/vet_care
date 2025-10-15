@@ -236,13 +236,7 @@ const MyPets = ({
                             >
                               <Eye className="w-4 h-4" />
                             </button>
-                            <button 
-                              onClick={() => handleEditPet(pet)}
-                              className="text-green-600 hover:text-green-900 p-1" 
-                              title="Edit Pet"
-                            >
-                              <Edit className="w-4 h-4" />
-                            </button>
+                            
                             <button 
                               onClick={() => handleDeletePet(pet._id)}
                               className="text-red-600 hover:text-red-900 p-1" 

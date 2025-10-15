@@ -4,6 +4,9 @@ const appointmentController = require('../controller/appointmentController');
 const authenticateToken = require('../middleware/auth');
 
 // CRUD - All routes require authentication
+
+router.delete('/', appointmentController.deleteAllAppointments);
+
 router.post('/', authenticateToken, appointmentController.createAppointment);
 router.get('/', authenticateToken, appointmentController.getAppointments);
 router.get('/:id', authenticateToken, appointmentController.getAppointmentById);

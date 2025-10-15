@@ -11,7 +11,7 @@ import ManagePetOwners from './pages/Admin/UserManagement/ManagePetOwners';
 import ManageDoctors from './pages/Admin/UserManagement/ManageDoctors';
 import AllAppointments from './pages/Admin/AppointmentOversight/AllAppointments';
 import AllPets from './pages/Admin/PetManagement/AllPets';
-import DiseaseAnalysis from './pages/Admin/ReportsAnalytics/DiseaseAnalysis';
+import AdminReports from './pages/Admin/Reports/AdminReports ';
 import ChatbotAdminPanel from './pages/Admin/ChatbotAdmin/ChatbotAdminPanel';
 
 // Pet Owner Components
@@ -37,7 +37,7 @@ function App() {
   const [pets, setPets] = useState([]);
   const [appointments, setAppointments] = useState([]);
   const [isSidebarOpen, setIsSidebarOpen] = useState(false);
-  const [loading, setLoading] = useState(false);
+  const [loading, setLoading] = useState(true); // Start with loading true
   const [error, setError] = useState(null);
 
   // Fetch data when user logs in
@@ -160,8 +160,8 @@ function App() {
         return <AllAppointments {...adminProps} />;
       case 'all-pets':
         return <AllPets {...adminProps} />;
-      case 'reports-analytics':
-        return <DiseaseAnalysis {...adminProps} />; 
+      case 'admin-reports':
+        return <AdminReports {...adminProps} />;
       case 'chatbot-admin':  
         return <ChatbotAdminPanel {...adminProps} />;   
       default:
@@ -249,12 +249,8 @@ function App() {
           refreshAppointments={refreshAppointments}
         />;
       case 'medical-reports':
-      case 'health-records':
-        return <MedicalReports {...commonProps} />;
-      case 'vaccination-records':
-        return <MedicalReports {...commonProps} />;
-      case 'prescriptions':
-        return <MedicalReports {...commonProps} />;
+        return <MedicalReports {...commonProps} />;  
+     
       case 'pet-details':
         return <MyPets 
           {...commonProps} 
