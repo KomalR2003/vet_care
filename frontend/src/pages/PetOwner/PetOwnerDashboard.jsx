@@ -1,4 +1,4 @@
-import React from "react";
+import React, { useState, useEffect } from "react";
 import AppSidebar from "../../components/AppSidebar";
 import {  
   Heart, 
@@ -9,8 +9,10 @@ import {
   Plus,
   User,
   Activity,
-  TrendingUp
+  TrendingUp,
+  AlertCircle
 } from "lucide-react";
+import { reportsAPI } from "../../api/api";
 
 const PetOwnerDashboard = ({ 
   user, 
@@ -22,6 +24,36 @@ const PetOwnerDashboard = ({
   isSidebarOpen, 
   setIsSidebarOpen 
 }) => {
+  const [reports, setReports] = useState([]);
+  const [loadingReports, setLoadingReports] = useState(true);
+
+  // Fetch reports when component mounts
+  useEffect(() => {
+    fetchReports();
+  }, []);
+
+  const fetchReports = async () => {
+    try {
+      setLoadingReports(true);
+      const response = await reportsAPI.getReports();
+      console.log('📊 Fetched reports:', response.data);
+      
+      // Filter reports for this pet owner's pets
+      const ownerPetIds = pets.map(pet => pet._id);
+      const ownerReports = response.data.filter(report => {
+        const reportPetId = report.pet?._id || report.pet;
+        return ownerPetIds.includes(reportPetId);
+      });
+      
+      setReports(ownerReports);
+    } catch (error) {
+      console.error('❌ Error fetching reports:', error);
+      setReports([]);
+    } finally {
+      setLoadingReports(false);
+    }
+  };
+
   // Helper function to format date for comparison
   const formatDateForComparison = (dateString) => {
     if (!dateString) return null;
@@ -37,19 +69,11 @@ const PetOwnerDashboard = ({
   // Calculate counts based on requirements
   const totalPets = pets.length;
   
-  console.log('Dashboard Debug:', {
-    totalAppointments: appointments.length,
-    appointments: appointments,
-    userID: user._id
-  });
-  
   // Filter appointments for this specific pet owner
   const ownerAppointments = appointments.filter(apt => {
     const ownerId = apt.owner?._id || apt.owner;
     return ownerId?.toString() === user._id?.toString();
   });
-  
-  console.log('Owner Appointments:', ownerAppointments);
   
   const todayDate = getTodayDate();
   
@@ -58,21 +82,8 @@ const PetOwnerDashboard = ({
     const aptDate = formatDateForComparison(apt.date);
     const isConfirmed = apt.status === 'confirmed';
     const isFutureOrToday = aptDate >= todayDate;
-    
-    console.log('Checking appointment:', {
-      id: apt._id,
-      date: apt.date,
-      formattedDate: aptDate,
-      status: apt.status,
-      isConfirmed,
-      isFutureOrToday,
-      todayDate
-    });
-    
     return isConfirmed && isFutureOrToday;
   });
-  
-  console.log('Upcoming Appointments:', upcomingAppts);
   
   const pendingAppts = ownerAppointments.filter(apt => 
     apt.status === 'pending'
@@ -85,8 +96,59 @@ const PetOwnerDashboard = ({
   const completedAppts = ownerAppointments.filter(apt => 
     apt.status === 'completed'
   );
+
+  // Health Summary Calculations
+  const recentReports = reports.length;
   
-  const recentReports = 0; // This will come from backend reports data
+  // Get reports from last 30 days
+  const thirtyDaysAgo = new Date();
+  thirtyDaysAgo.setDate(thirtyDaysAgo.getDate() - 30);
+  
+  const recentHealthReports = reports.filter(report => {
+    const reportDate = new Date(report.date);
+    return reportDate >= thirtyDaysAgo;
+  });
+
+  // Calculate pets with recent checkups (within last 90 days)
+  const ninetyDaysAgo = new Date();
+  ninetyDaysAgo.setDate(ninetyDaysAgo.getDate() - 90);
+  
+  const petsWithRecentCheckup = new Set(
+    reports
+      .filter(report => new Date(report.date) >= ninetyDaysAgo)
+      .map(report => report.pet?._id || report.pet)
+  ).size;
+
+  // Check for pets needing attention (no checkup in 90 days)
+  const petsNeedingCheckup = totalPets - petsWithRecentCheckup;
+
+  // Calculate health status
+  const getHealthStatus = () => {
+    if (petsNeedingCheckup === 0) {
+      return {
+        status: 'Excellent',
+        message: 'All pets have recent checkups',
+        color: 'green',
+        icon: <TrendingUp className="w-8 h-8 text-green-600 mx-auto mb-2" />
+      };
+    } else if (petsNeedingCheckup <= totalPets * 0.3) {
+      return {
+        status: 'Good',
+        message: `${petsNeedingCheckup} pet(s) need checkup soon`,
+        color: 'blue',
+        icon: <Activity className="w-8 h-8 text-blue-600 mx-auto mb-2" />
+      };
+    } else {
+      return {
+        status: 'Needs Attention',
+        message: `${petsNeedingCheckup} pet(s) need checkup`,
+        color: 'yellow',
+        icon: <AlertCircle className="w-8 h-8 text-yellow-600 mx-auto mb-2" />
+      };
+    }
+  };
+
+  const healthStatus = getHealthStatus();
 
   const quickActions = [
     {
@@ -354,27 +416,120 @@ const PetOwnerDashboard = ({
             </div>
           )}
 
-          {/* Health Summary */}
+          {/* Health Summary - REAL-TIME DATA */}
           <div className="mt-8">
             <div className="bg-white rounded-lg shadow p-6">
-              <h2 className="text-xl font-semibold text-gray-800 mb-4">Health Summary</h2>
-              <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
-                <div className="text-center p-4 bg-green-50 rounded-lg">
-                  <TrendingUp className="w-8 h-8 text-green-600 mx-auto mb-2" />
-                  <p className="text-sm font-medium text-gray-900">All Pets Healthy</p>
-                  <p className="text-xs text-gray-500">No urgent health issues</p>
-                </div>
-                <div className="text-center p-4 bg-blue-50 rounded-lg">
-                  <Activity className="w-8 h-8 text-blue-600 mx-auto mb-2" />
-                  <p className="text-sm font-medium text-gray-900">Total Appointments</p>
-                  <p className="text-xs text-gray-500">{ownerAppointments.length} appointments</p>
-                </div>
-                <div className="text-center p-4 bg-purple-50 rounded-lg">
-                  <FileText className="w-8 h-8 text-purple-600 mx-auto mb-2" />
-                  <p className="text-sm font-medium text-gray-900">Reports Available</p>
-                  <p className="text-xs text-gray-500">{recentReports} new reports</p>
-                </div>
+              <div className="flex justify-between items-center mb-6">
+                <h2 className="text-xl font-semibold text-gray-800">Health Summary</h2>
+                <button
+                  onClick={() => setCurrentView('medical-reports')}
+                  className="text-blue-600 hover:text-blue-800 text-sm font-medium"
+                >
+                  View All Reports
+                </button>
               </div>
+              
+              {loadingReports ? (
+                <div className="flex justify-center py-8">
+                  <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-blue-600"></div>
+                </div>
+              ) : (
+                <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
+                  {/* Overall Health Status */}
+                  <div className={`text-center p-6 rounded-xl border-2 ${
+                    healthStatus.color === 'green' ? 'bg-green-50 border-green-200' :
+                    healthStatus.color === 'blue' ? 'bg-blue-50 border-blue-200' :
+                    'bg-yellow-50 border-yellow-200'
+                  }`}>
+                    {healthStatus.icon}
+                    <p className="text-lg font-bold text-gray-900 mb-1">{healthStatus.status}</p>
+                    <p className="text-sm text-gray-600">{healthStatus.message}</p>
+                    {petsNeedingCheckup > 0 && (
+                      <button
+                        onClick={() => setCurrentView('book-appointment')}
+                        className="mt-3 text-xs bg-white px-3 py-1 rounded-full text-blue-600 hover:bg-blue-50 font-medium"
+                      >
+                        Book Checkup
+                      </button>
+                    )}
+                  </div>
+
+                  {/* Total Appointments */}
+                  <div className="text-center p-6 bg-blue-50 border-2 border-blue-200 rounded-xl">
+                    <Activity className="w-8 h-8 text-blue-600 mx-auto mb-2" />
+                    <p className="text-lg font-bold text-gray-900 mb-1">
+                      {ownerAppointments.length} Appointments
+                    </p>
+                    <p className="text-sm text-gray-600">
+                      {completedAppts.length} completed • {upcomingAppts.length} upcoming
+                    </p>
+                    <div className="mt-3 flex justify-center space-x-2">
+                      <span className="text-xs bg-green-100 text-green-700 px-2 py-1 rounded-full">
+                        {completedAppts.length} Done
+                      </span>
+                      <span className="text-xs bg-orange-100 text-orange-700 px-2 py-1 rounded-full">
+                        {pendingAppts.length} Pending
+                      </span>
+                    </div>
+                  </div>
+
+                  {/* Medical Reports */}
+                  <div className="text-center p-6 bg-purple-50 border-2 border-purple-200 rounded-xl">
+                    <FileText className="w-8 h-8 text-purple-600 mx-auto mb-2" />
+                    <p className="text-lg font-bold text-gray-900 mb-1">
+                      {recentReports} Reports
+                    </p>
+                    <p className="text-sm text-gray-600">
+                      {recentHealthReports.length} in last 30 days
+                    </p>
+                    {recentReports > 0 ? (
+                      <button
+                        onClick={() => setCurrentView('medical-reports')}
+                        className="mt-3 text-xs bg-white px-3 py-1 rounded-full text-purple-600 hover:bg-purple-100 font-medium"
+                      >
+                        View Reports
+                      </button>
+                    ) : (
+                      <p className="mt-3 text-xs text-gray-500">
+                        Reports will appear after appointments
+                      </p>
+                    )}
+                  </div>
+                </div>
+              )}
+
+              {/* Recent Health Activity */}
+              {!loadingReports && recentHealthReports.length > 0 && (
+                <div className="mt-6 pt-6 border-t">
+                  <h3 className="font-semibold text-gray-800 mb-4">Recent Reports Activity</h3>
+                  <div className="space-y-3">
+                    {recentHealthReports.slice(0, 3).map((report) => (
+                      <div 
+                        key={report._id}
+                        className="flex items-center p-3 bg-gray-50 rounded-lg hover:bg-gray-100 transition-colors cursor-pointer"
+                        onClick={() => setCurrentView('medical-reports')}
+                      >
+                        <div className="w-10 h-10 bg-purple-100 rounded-full flex items-center justify-center mr-3">
+                          <FileText className="w-5 h-5 text-purple-600" />
+                        </div>
+                        <div className="flex-1">
+                          <p className="text-sm font-medium text-gray-900">
+                            {report.pet?.name || 'Pet'} - {report.summary || 'Medical Report'}
+                          </p>
+                          <p className="text-xs text-gray-500">
+                            {formatDisplayDate(report.date)} • Dr. {report.doctor?.userId?.name || 'Doctor'}
+                          </p>
+                        </div>
+                        {report.medications && report.medications.length > 0 && (
+                          <span className="text-xs bg-blue-100 text-blue-700 px-2 py-1 rounded-full">
+                            {report.medications.length} med{report.medications.length > 1 ? 's' : ''}
+                          </span>
+                        )}
+                      </div>
+                    ))}
+                  </div>
+                </div>
+              )}
             </div>
           </div>
         </div>

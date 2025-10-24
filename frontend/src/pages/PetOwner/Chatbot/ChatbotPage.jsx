@@ -132,7 +132,7 @@ function ChatbotApp({ setCurrentView }) {
         />
 
         {/* Main Content Area */}
-        <div className="flex-1 flex flex-col lg:ml-28">
+        <div className="flex-1 flex flex-col lg:ml-20">
           
           {/* ✅ Only show header when admin panel is NOT open */}
           {!adminPanelOpen && (

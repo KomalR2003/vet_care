@@ -1,7 +1,7 @@
 import React, { useState, useEffect } from 'react';
 import AppSidebar from '../../components/AppSidebar';
 import { FileText, Download, Eye, Calendar, User, Heart, X, Filter } from 'lucide-react';
-import { reportsAPI } from '../../api/api';
+import { reportsAPI, petsAPI } from '../../api/api';
 
 const MedicalReports = ({ 
   user, 
@@ -18,16 +18,59 @@ const MedicalReports = ({
   const [showDetailsModal, setShowDetailsModal] = useState(false);
   const [filterPet, setFilterPet] = useState('all');
   const [pets, setPets] = useState([]);
+  const [userPets, setUserPets] = useState([]);
 
   useEffect(() => {
-    fetchReports();
-  }, []);
+    fetchData();
+  }, [user]);
+
+  const fetchData = async () => {
+    try {
+      setLoading(true);
+      
+      // Fetch user's pets first
+      const petsResponse = await petsAPI.getPets();
+      console.log('📦 Fetched pets:', petsResponse.data);
+      
+      // Filter pets for current user
+      const ownerPets = petsResponse.data.filter(pet => {
+        const petOwnerId = pet.owner?._id || pet.owner;
+        return petOwnerId?.toString() === user._id?.toString();
+      });
+      
+      console.log('🐕 Owner pets:', ownerPets);
+      setUserPets(ownerPets);
+      
+      // Fetch all reports
+      const reportsResponse = await reportsAPI.getReports();
+      console.log('📊 All reports:', reportsResponse.data);
+      
+      // Filter reports for this owner's pets
+      const ownerPetIds = ownerPets.map(pet => pet._id);
+      const ownerReports = reportsResponse.data.filter(report => {
+        const reportPetId = report.pet?._id || report.pet;
+        return ownerPetIds.includes(reportPetId);
+      });
+      
+      console.log('✅ Owner reports:', ownerReports);
+      setReports(ownerReports);
+      
+      // Extract unique pets from reports
+      const uniquePets = [...new Map(ownerReports.map(r => [r.pet?._id, r.pet])).values()];
+      setPets(uniquePets);
+      
+      // Set initial filtered reports
+      setFilteredReports(ownerReports);
+    } catch (error) {
+      console.error('❌ Error fetching data:', error);
+      setReports([]);
+      setFilteredReports([]);
+    } finally {
+      setLoading(false);
+    }
+  };
 
   useEffect(() => {
-    // Extract unique pets from reports
-    const uniquePets = [...new Map(reports.map(r => [r.pet?._id, r.pet])).values()];
-    setPets(uniquePets);
-
     // Filter reports by pet
     if (filterPet === 'all') {
       setFilteredReports(reports);
@@ -35,18 +78,6 @@ const MedicalReports = ({
       setFilteredReports(reports.filter(r => r.pet?._id === filterPet));
     }
   }, [reports, filterPet]);
-
-  const fetchReports = async () => {
-    try {
-      setLoading(true);
-      const response = await reportsAPI.getReports();
-      setReports(response.data);
-    } catch (error) {
-      console.error('Error fetching reports:', error);
-    } finally {
-      setLoading(false);
-    }
-  };
 
   const handleDownloadPDF = async (reportId, petName) => {
     try {
@@ -302,26 +333,28 @@ const MedicalReports = ({
           </div>
 
           {/* Filter Section */}
-          <div className="bg-white rounded-lg shadow p-4 mb-6">
-            <div className="flex items-center space-x-4">
-              <Filter className="w-5 h-5 text-gray-600" />
-              <select
-                value={filterPet}
-                onChange={(e) => setFilterPet(e.target.value)}
-                className="flex-1 max-w-xs px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent"
-              >
-                <option value="all">All Pets</option>
-                {pets.map(pet => (
-                  <option key={pet._id} value={pet._id}>
-                    {pet.name} - {pet.species}
-                  </option>
-                ))}
-              </select>
-              <span className="text-sm text-gray-600">
-                {filteredReports.length} {filteredReports.length === 1 ? 'report' : 'reports'} found
-              </span>
+          {pets.length > 0 && (
+            <div className="bg-white rounded-lg shadow p-4 mb-6">
+              <div className="flex items-center space-x-4">
+                <Filter className="w-5 h-5 text-gray-600" />
+                <select
+                  value={filterPet}
+                  onChange={(e) => setFilterPet(e.target.value)}
+                  className="flex-1 max-w-xs px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent"
+                >
+                  <option value="all">All Pets</option>
+                  {pets.map(pet => (
+                    <option key={pet._id} value={pet._id}>
+                      {pet.name} - {pet.species}
+                    </option>
+                  ))}
+                </select>
+                <span className="text-sm text-gray-600">
+                  {filteredReports.length} {filteredReports.length === 1 ? 'report' : 'reports'} found
+                </span>
+              </div>
             </div>
-          </div>
+          )}
 
           {/* Reports Section */}
           {loading ? (
@@ -332,11 +365,19 @@ const MedicalReports = ({
             <div className="bg-white rounded-lg shadow p-12 text-center">
               <FileText className="w-16 h-16 text-gray-400 mx-auto mb-4" />
               <h3 className="text-xl font-semibold text-gray-800 mb-2">No Medical Reports Found</h3>
-              <p className="text-gray-600">
-                {filterPet === 'all' 
+              <p className="text-gray-600 mb-4">
+                {reports.length === 0 
                   ? "You don't have any medical reports yet. They will appear here after your pet's appointments."
                   : "No reports found for the selected pet."}
               </p>
+              {userPets.length === 0 && (
+                <button
+                  onClick={() => setCurrentView('add-pet')}
+                  className="mt-4 bg-blue-600 text-white px-6 py-2 rounded-lg hover:bg-blue-700"
+                >
+                  Add Your First Pet
+                </button>
+              )}
             </div>
           ) : (
             <div className="grid grid-cols-1 lg:grid-cols-2 xl:grid-cols-3 gap-6">
@@ -370,8 +411,8 @@ const MedicalReports = ({
                   <div className="p-4">
                     <div className="mb-3">
                       <p className="text-sm text-gray-600 mb-1">Doctor:</p>
-                      <p className="font-semibold text-gray-900">Dr. {report.doctor?.userId?.name}</p>
-                      <p className="text-xs text-gray-500">{report.doctor?.specialization}</p>
+                      <p className="font-semibold text-gray-900">Dr. {report.doctor?.userId?.name || 'N/A'}</p>
+                      <p className="text-xs text-gray-500">{report.doctor?.specialization || 'N/A'}</p>
                     </div>
 
                     <div className="mb-4">

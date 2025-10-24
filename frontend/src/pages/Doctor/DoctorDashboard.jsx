@@ -1,7 +1,7 @@
 import React, { useState, useEffect, useMemo } from "react";
 import AppSidebar from "../../components/AppSidebar";
 import { Calendar, CheckCircle, AlertCircle, FileText, Eye, X } from "lucide-react";
-import { appointmentsAPI } from "../../api/api";
+import { appointmentsAPI, reportsAPI } from "../../api/api";
 
 const DoctorDashboard = ({
   user,
@@ -17,6 +17,33 @@ const DoctorDashboard = ({
   const [selectedAppointment, setSelectedAppointment] = useState(null);
   const [showDetails, setShowDetails] = useState(false);
   const [doctorAppointments, setDoctorAppointments] = useState([]);
+  const [recentReports, setRecentReports] = useState([]);
+  const [loadingReports, setLoadingReports] = useState(true);
+
+  // Fetch reports when component mounts
+  useEffect(() => {
+    fetchReports();
+  }, []);
+
+  const fetchReports = async () => {
+    try {
+      setLoadingReports(true);
+      const response = await reportsAPI.getReports();
+      console.log('📊 Fetched reports:', response.data); // Debug log
+      
+      // Get the 3 most recent reports and sort by date
+      const sortedReports = (response.data || [])
+        .sort((a, b) => new Date(b.date) - new Date(a.date))
+        .slice(0, 3);
+      
+      setRecentReports(sortedReports);
+    } catch (error) {
+      console.error('❌ Error fetching reports:', error);
+      setRecentReports([]);
+    } finally {
+      setLoadingReports(false);
+    }
+  };
 
   // --- Date helpers ---
   const getDateOnly = (dateInput) => {
@@ -114,8 +141,6 @@ const DoctorDashboard = ({
       );
     })
     .sort((a, b) => getDateTimeValue(a) - getDateTimeValue(b));
-
-  const recentReports = reports?.slice(0, 3) || [];
 
   // Pet/Owner helpers
   const getPetName = (apt) =>
@@ -368,18 +393,45 @@ const DoctorDashboard = ({
 
         {/* Recent Reports */}
         <div className="bg-white p-6 rounded-lg shadow">
-          <h2 className="text-lg font-semibold mb-4">Recent Reports</h2>
-          {recentReports.length === 0 ? (
-            <p className="text-gray-400 text-center">No recent reports</p>
+          <div className="flex justify-between mb-4">
+            <h2 className="text-lg font-semibold">Recent Reports</h2>
+            <button className="text-blue-600 hover:underline" onClick={() => setCurrentView("reports")}>
+              View All
+            </button>
+          </div>
+          
+          {loadingReports ? (
+            <div className="flex justify-center py-8">
+              <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-blue-600"></div>
+            </div>
+          ) : recentReports.length === 0 ? (
+            <p className="text-gray-400 text-center py-6">No recent reports</p>
           ) : (
-            <ul className="space-y-2">
+            <ul className="space-y-3">
               {recentReports.map((r, i) => (
-                <li key={i} className="border-b pb-2 last:border-b-0">
-                  <div className="flex justify-between">
-                    <p>{r.petName || "Unknown Pet"}</p>
-                    <span className="text-xs text-gray-500">{r.date ? new Date(r.date).toLocaleDateString("en-CA") : ""}</span>
+                <li key={r._id || i} className="border-b pb-3 last:border-b-0 hover:bg-gray-50 p-2 rounded transition">
+                  <div className="flex justify-between items-start">
+                    <div className="flex-1">
+                      <p className="font-medium text-gray-800">
+                        {r.pet?.name || r.petName || "Unknown Pet"}
+                      </p>
+                      <p className="text-sm text-gray-600 mt-1">
+                        {r.summary || r.diagnosis || "No summary"}
+                      </p>
+                      {r.owner?.name && (
+                        <p className="text-xs text-gray-500 mt-1">
+                          Owner: {r.owner.name}
+                        </p>
+                      )}
+                    </div>
+                    <span className="text-xs text-gray-500 whitespace-nowrap ml-4">
+                      {r.date ? new Date(r.date).toLocaleDateString("en-US", {
+                        month: 'short',
+                        day: 'numeric',
+                        year: 'numeric'
+                      }) : ""}
+                    </span>
                   </div>
-                  <p className="text-sm text-gray-600">{r.summary || "No summary"}</p>
                 </li>
               ))}
             </ul>
