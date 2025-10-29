@@ -1,7 +1,6 @@
 import os
 from dotenv import load_dotenv
-from langchain.prompts import PromptTemplate
-from langchain.chains import LLMChain
+from langchain_core.prompts import PromptTemplate
 from langchain_groq import ChatGroq
 from langchain_huggingface import HuggingFaceEmbeddings  
 from modules.load_vectorstore import similarity_search
@@ -108,14 +107,15 @@ def get_llm_chain(collection):
             input_variables=["question"]
         )
         
-        # Create chains
-        document_chain = LLMChain(llm=llm, prompt=document_prompt)
-        general_chain = LLMChain(llm=llm, prompt=general_prompt)
+        # Create chains using the new LCEL syntax (pipe operator)
+        document_chain = document_prompt | llm
+        general_chain = general_prompt | llm
         
         return {
             "document_chain": document_chain,
             "general_chain": general_chain,
-            "retriever": retriever
+            "retriever": retriever,
+            "llm": llm
         }
         
     except Exception as e:
