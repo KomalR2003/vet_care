@@ -11,6 +11,7 @@ import ManagePetOwners from './pages/Admin/UserManagement/ManagePetOwners';
 import ManageDoctors from './pages/Admin/UserManagement/ManageDoctors';
 import AllAppointments from './pages/Admin/AppointmentOversight/AllAppointments';
 import AllPets from './pages/Admin/PetManagement/AllPets';
+import MedicalHistory from './pages/Admin/PetManagement/MedicalHistory';
 import AdminReports from './pages/Admin/Reports/AdminReports ';
 import ChatbotAdminPanel from './pages/Admin/ChatbotAdmin/ChatbotAdminPanel';
 
@@ -160,6 +161,8 @@ function App() {
         return <AllAppointments {...adminProps} />;
       case 'all-pets':
         return <AllPets {...adminProps} />;
+        case 'medical-history':
+          return <MedicalHistory {...adminProps} />;
       case 'admin-reports':
         return <AdminReports {...adminProps} />;
       case 'chatbot-admin':  
