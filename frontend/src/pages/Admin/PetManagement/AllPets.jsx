@@ -37,12 +37,10 @@ const AllPets = ({ user, pets, setCurrentView, setUser, currentView, isSidebarOp
               ) : (
                 pets.map((pet) => (
                 <tr key={pet.id} className="hover:bg-gray-50">
-                  <td className="px-4 py-4 whitespace-nowrap flex items-center">
-                    <PawPrint className="w-5 h-5 text-blue-500 mr-2" />
+                  <td className="px-4 py-4 whitespace-nowrap ">        
                     {pet.name}
                   </td>
-                  <td className="px-4 py-4 whitespace-nowrap flex items-center">
-                    <User className="w-4 h-4 text-gray-400 mr-1" />
+                  <td className="px-4 py-4 whitespace-nowrap ">
                      {pet.owner?.name || pet.owner?.email || "Unknown"}
                   </td>
                   <td className="px-4 py-4 whitespace-nowrap">{pet.species}</td>

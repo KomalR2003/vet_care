@@ -9,6 +9,7 @@ const doctorRoutes = require('./routes/doctorRoute.js');
 const petRoutes = require('./routes/petRoute.js');
 const appointmentRoutes  = require('./routes/appointmentRoute.js');
 const reportRoutes = require('./routes/reportRoute.js');
+const userRoutes = require('./routes/userRoute.js');
 
 const app = express();
 const PORT = 5000;
@@ -26,6 +27,7 @@ app.use('/api/doctors', doctorRoutes);
 app.use('/api/pets', petRoutes); 
 app.use('/api/appointments', appointmentRoutes); 
 app.use('/api/reports', reportRoutes); 
+app.use('/api/users', userRoutes);
 
 // Server
 app.listen(PORT, () => {

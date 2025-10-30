@@ -385,18 +385,18 @@ const MedicalHistory = ({ user, pets, setCurrentView, setUser, currentView, isSi
                   <div key={pet._id} className="bg-white rounded-xl shadow-lg hover:shadow-xl transition-shadow border-2 border-gray-200 overflow-hidden">
                     {/* Card Header */}
                     <div className={`${
-                      healthStatus.status === 'healthy' ? 'bg-gradient-to-r from-green-500 to-green-600' :
+                      healthStatus.status === 'healthy' ? 'bg-blue-100' :
                       healthStatus.status === 'attention' ? 'bg-gradient-to-r from-yellow-500 to-yellow-600' :
                       'bg-gradient-to-r from-blue-500 to-blue-600'
                     } p-4`}>
                       <div className="flex items-center justify-between">
                         <div className="flex items-center space-x-3">
                           <div className="w-12 h-12 bg-white bg-opacity-20 rounded-full flex items-center justify-center">
-                            <Heart className="w-6 h-6 text-white" />
+                            <Heart className="w-6 h-6 text-blue-600" />
                           </div>
                           <div>
-                            <h3 className="text-xl font-bold text-white">{pet.name}</h3>
-                            <p className="text-sm text-white text-opacity-90">{pet.species} - {pet.breed}</p>
+                            <h3 className="text-xl font-bold text-blue-600">{pet.name}</h3>
+                            <p className="text-sm text-blue-600 text-opacity-90">{pet.species} - {pet.breed}</p>
                           </div>
                         </div>
                       </div>
