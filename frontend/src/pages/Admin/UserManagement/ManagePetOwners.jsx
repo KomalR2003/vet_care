@@ -31,11 +31,19 @@ const ManagePetOwners = ({
   const handleEditOwner = (petOwner) => {
     setEditingOwner({
       _id: petOwner._id,
-      name: petOwner.name,
-      email: petOwner.email,
-      phone: petOwner.phone
+      name: petOwner.name || '',
+      email: petOwner.email || '',
+      phone: petOwner.phone || '',
+      role: petOwner.role || 'pet owner'
     });
     setShowEditModal(true);
+  };
+
+  const handleInputChange = (field, value) => {
+    setEditingOwner(prev => ({
+      ...prev,
+      [field]: value
+    }));
   };
 
   const handleSaveEdit = async () => {
@@ -51,11 +59,15 @@ const ManagePetOwners = ({
         body: JSON.stringify({
           name: editingOwner.name,
           email: editingOwner.email,
-          phone: editingOwner.phone
+          phone: editingOwner.phone,
+          role: editingOwner.role
         })
       });
 
-      if (!response.ok) throw new Error('Failed to update user');
+      if (!response.ok) {
+        const errorData = await response.json();
+        throw new Error(errorData.error || 'Failed to update user');
+      }
 
       alert('Pet owner updated successfully!');
       setShowEditModal(false);
@@ -63,7 +75,7 @@ const ManagePetOwners = ({
       if (refreshPets) await refreshPets();
     } catch (error) {
       console.error('Error updating pet owner:', error);
-      alert('Failed to update pet owner. Please try again.');
+      alert(error.message || 'Failed to update pet owner. Please try again.');
     } finally {
       setLoading(false);
     }
@@ -104,6 +116,7 @@ const ManagePetOwners = ({
             name: pet.owner.name,
             email: pet.owner.email,
             phone: pet.owner.phone,
+            role: pet.owner.role || 'pet owner',
             totalPets: 0,
             pets: []
           };
@@ -122,7 +135,7 @@ const ManagePetOwners = ({
     if (!editingOwner) return null;
 
     return (
-      <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50">
+      <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50 p-4">
         <div className="bg-white rounded-lg shadow-xl max-w-md w-full mx-4">
           <div className="p-6">
             <div className="flex justify-between items-center mb-6">
@@ -134,33 +147,49 @@ const ManagePetOwners = ({
 
             <div className="space-y-4">
               <div>
-                <label className="block text-sm font-medium text-gray-700 mb-2">Name</label>
+                <label className="block text-sm font-medium text-gray-700 mb-2">Name *</label>
                 <input
                   type="text"
                   value={editingOwner.name}
-                  onChange={(e) => setEditingOwner({...editingOwner, name: e.target.value})}
+                  onChange={(e) => handleInputChange('name', e.target.value)}
                   className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500"
+                  required
                 />
               </div>
 
               <div>
-                <label className="block text-sm font-medium text-gray-700 mb-2">Email</label>
+                <label className="block text-sm font-medium text-gray-700 mb-2">Email *</label>
                 <input
                   type="email"
                   value={editingOwner.email}
-                  onChange={(e) => setEditingOwner({...editingOwner, email: e.target.value})}
+                  onChange={(e) => handleInputChange('email', e.target.value)}
                   className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500"
+                  required
                 />
               </div>
 
               <div>
-                <label className="block text-sm font-medium text-gray-700 mb-2">Phone</label>
+                <label className="block text-sm font-medium text-gray-700 mb-2">Phone *</label>
                 <input
                   type="tel"
                   value={editingOwner.phone}
-                  onChange={(e) => setEditingOwner({...editingOwner, phone: e.target.value})}
+                  onChange={(e) => handleInputChange('phone', e.target.value)}
                   className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500"
+                  required
                 />
+              </div>
+
+              <div>
+                <label className="block text-sm font-medium text-gray-700 mb-2">Role</label>
+                <select
+                  value={editingOwner.role}
+                  onChange={(e) => handleInputChange('role', e.target.value)}
+                  className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500"
+                >
+                  <option value="pet owner">Pet Owner</option>
+                  <option value="doctor">Doctor</option>
+                  <option value="admin">Admin</option>
+                </select>
               </div>
             </div>
 
@@ -190,7 +219,7 @@ const ManagePetOwners = ({
     if (!selectedPetOwner) return null;
 
     return (
-      <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50">
+      <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50 p-4">
         <div className="bg-white rounded-lg shadow-xl max-w-4xl w-full mx-4 max-h-[90vh] overflow-y-auto">
           <div className="p-6">
             <div className="flex justify-between items-center mb-6">

@@ -5,13 +5,13 @@ const doctorSchema = new mongoose.Schema({
     type: mongoose.Schema.Types.ObjectId, 
     ref: 'User', 
     required: true,
-    unique: true  // one doctor profile per user
+    unique: true  
   },
   specialization: { type: String, required: true },
   experience: { type: Number, required: true },
   consultation_fee: { type: Number, required: true },
-  available_days: [{ type: String }],   // e.g. ["Mon", "Tue", "Wed"]
-  available_times: [{ type: String }],  // e.g. ["9am-12pm", "2pm-6pm"]
+  available_days: [{ type: String }],   
+  available_times: [{ type: String }],  
   bio: { type: String },
   isVerified: { type: Boolean, default: false },
   leaveDays: [{ type: Date }],

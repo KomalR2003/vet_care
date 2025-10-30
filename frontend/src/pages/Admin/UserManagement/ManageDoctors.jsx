@@ -32,17 +32,24 @@ const ManageDoctors = ({
     setEditingDoctor({
       _id: doctor._id,
       userId: doctor.userId._id,
-      name: doctor.userId.name,
-      email: doctor.userId.email,
-      phone: doctor.userId.phone,
-      specialization: doctor.specialization,
-      experience: doctor.experience,
-      consultation_fee: doctor.consultation_fee,
+      name: doctor.userId.name || '',
+      email: doctor.userId.email || '',
+      phone: doctor.userId.phone || '',
+      specialization: doctor.specialization || '',
+      experience: doctor.experience || 0,
+      consultation_fee: doctor.consultation_fee || 0,
       bio: doctor.bio || '',
       available_days: doctor.available_days || [],
       available_times: doctor.available_times || []
     });
     setShowEditModal(true);
+  };
+
+  const handleInputChange = (field, value) => {
+    setEditingDoctor(prev => ({
+      ...prev,
+      [field]: value
+    }));
   };
 
   const handleSaveEdit = async () => {
@@ -141,21 +148,15 @@ const ManageDoctors = ({
     const toggleDay = (day) => {
       const days = editingDoctor.available_days || [];
       if (days.includes(day)) {
-        setEditingDoctor({
-          ...editingDoctor,
-          available_days: days.filter(d => d !== day)
-        });
+        handleInputChange('available_days', days.filter(d => d !== day));
       } else {
-        setEditingDoctor({
-          ...editingDoctor,
-          available_days: [...days, day]
-        });
+        handleInputChange('available_days', [...days, day]);
       }
     };
 
     return (
-      <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50 p-4">
-        <div className="bg-white rounded-lg shadow-xl max-w-2xl w-full max-h-[90vh] overflow-y-auto">
+      <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50 p-4 overflow-y-auto">
+        <div className="bg-white rounded-lg shadow-xl max-w-2xl w-full my-8">
           <div className="p-6">
             <div className="flex justify-between items-center mb-6">
               <h2 className="text-2xl font-bold text-gray-800">Edit Doctor Profile</h2>
@@ -164,24 +165,24 @@ const ManageDoctors = ({
               </button>
             </div>
 
-            <div className="space-y-4">
+            <div className="space-y-4 max-h-[70vh] overflow-y-auto">
               <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
                 <div>
-                  <label className="block text-sm font-medium text-gray-700 mb-2">Name</label>
+                  <label className="block text-sm font-medium text-gray-700 mb-2">Name *</label>
                   <input
                     type="text"
                     value={editingDoctor.name}
-                    onChange={(e) => setEditingDoctor({...editingDoctor, name: e.target.value})}
+                    onChange={(e) => handleInputChange('name', e.target.value)}
                     className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500"
                   />
                 </div>
 
                 <div>
-                  <label className="block text-sm font-medium text-gray-700 mb-2">Email</label>
+                  <label className="block text-sm font-medium text-gray-700 mb-2">Email *</label>
                   <input
                     type="email"
                     value={editingDoctor.email}
-                    onChange={(e) => setEditingDoctor({...editingDoctor, email: e.target.value})}
+                    onChange={(e) => handleInputChange('email', e.target.value)}
                     className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500"
                   />
                 </div>
@@ -189,21 +190,21 @@ const ManageDoctors = ({
 
               <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
                 <div>
-                  <label className="block text-sm font-medium text-gray-700 mb-2">Phone</label>
+                  <label className="block text-sm font-medium text-gray-700 mb-2">Phone *</label>
                   <input
                     type="tel"
                     value={editingDoctor.phone}
-                    onChange={(e) => setEditingDoctor({...editingDoctor, phone: e.target.value})}
+                    onChange={(e) => handleInputChange('phone', e.target.value)}
                     className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500"
                   />
                 </div>
 
                 <div>
-                  <label className="block text-sm font-medium text-gray-700 mb-2">Specialization</label>
+                  <label className="block text-sm font-medium text-gray-700 mb-2">Specialization *</label>
                   <input
                     type="text"
                     value={editingDoctor.specialization}
-                    onChange={(e) => setEditingDoctor({...editingDoctor, specialization: e.target.value})}
+                    onChange={(e) => handleInputChange('specialization', e.target.value)}
                     className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500"
                   />
                 </div>
@@ -211,22 +212,25 @@ const ManageDoctors = ({
 
               <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
                 <div>
-                  <label className="block text-sm font-medium text-gray-700 mb-2">Experience (years)</label>
+                  <label className="block text-sm font-medium text-gray-700 mb-2">Experience (years) *</label>
                   <input
                     type="number"
                     value={editingDoctor.experience}
-                    onChange={(e) => setEditingDoctor({...editingDoctor, experience: e.target.value})}
+                    onChange={(e) => handleInputChange('experience', e.target.value)}
                     className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500"
+                    min="0"
                   />
                 </div>
 
                 <div>
-                  <label className="block text-sm font-medium text-gray-700 mb-2">Consultation Fee ($)</label>
+                  <label className="block text-sm font-medium text-gray-700 mb-2">Consultation Fee ($) *</label>
                   <input
                     type="number"
                     value={editingDoctor.consultation_fee}
-                    onChange={(e) => setEditingDoctor({...editingDoctor, consultation_fee: e.target.value})}
+                    onChange={(e) => handleInputChange('consultation_fee', e.target.value)}
                     className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500"
+                    min="0"
+                    step="0.01"
                   />
                 </div>
               </div>
@@ -235,7 +239,7 @@ const ManageDoctors = ({
                 <label className="block text-sm font-medium text-gray-700 mb-2">Bio</label>
                 <textarea
                   value={editingDoctor.bio}
-                  onChange={(e) => setEditingDoctor({...editingDoctor, bio: e.target.value})}
+                  onChange={(e) => handleInputChange('bio', e.target.value)}
                   rows={4}
                   className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500"
                   placeholder="Brief bio about the doctor..."
@@ -267,17 +271,14 @@ const ManageDoctors = ({
                 <input
                   type="text"
                   value={editingDoctor.available_times?.join(', ') || ''}
-                  onChange={(e) => setEditingDoctor({
-                    ...editingDoctor,
-                    available_times: e.target.value.split(',').map(t => t.trim()).filter(t => t)
-                  })}
+                  onChange={(e) => handleInputChange('available_times', e.target.value.split(',').map(t => t.trim()).filter(t => t))}
                   className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500"
                   placeholder="e.g., 9:00 AM - 12:00 PM, 2:00 PM - 6:00 PM"
                 />
               </div>
             </div>
 
-            <div className="flex justify-end space-x-3 mt-6">
+            <div className="flex justify-end space-x-3 mt-6 pt-4 border-t">
               <button
                 onClick={() => setShowEditModal(false)}
                 className="px-4 py-2 border border-gray-300 text-gray-700 rounded-lg hover:bg-gray-50"
@@ -303,7 +304,7 @@ const ManageDoctors = ({
     if (!selectedDoctor) return null;
 
     return (
-      <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50">
+      <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50 p-4">
         <div className="bg-white rounded-lg shadow-xl max-w-2xl w-full mx-4 max-h-[90vh] overflow-y-auto">
           <div className="p-6">
             <div className="flex justify-between items-center mb-6">

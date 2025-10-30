@@ -11,11 +11,10 @@ exports.createDoctor = async (req, res) => {
   }
 };
 
-// Get all doctors
 exports.getDoctors = async (req, res) => {
   try {
     const doctors = await Doctor.find()
-      .populate('userId', 'name email phone'); // populate user info
+      .populate('userId', 'name email phone');
     
     res.json(doctors);
   } catch (err) {
@@ -53,31 +52,9 @@ exports.deleteDoctor = async (req, res) => {
   }
 };
 
-// exports.updateSettings = async (req, res) => {
-//   try {
-//     // Update the logged-in doctor's settings
-//     const updatedUser = await User.findByIdAndUpdate(
-//       req.user._id, 
-//       {
-//         name: req.body.name,
-//         phone: req.body.contact,
-//         occupation: req.body.occupation,
-//         availability: req.body.availability,
-//         leaveDays: req.body.leaveDays
-//       }, 
-//       { new: true }
-//     );
-    
-//     if (!updatedUser) return res.status(404).json({ error: 'Doctor not found' });
-//     res.json(updatedUser);
-//   } catch (err) {
-//     res.status(400).json({ error: err.message });
-//   }
-// };
-
 exports.updateSettings = async (req, res) => {
   try {
-    const userId = req.user._id; // from JWT
+    const userId = req.user._id;
 
     // 1. Update User collection
     const updatedUser = await User.findByIdAndUpdate(
@@ -95,16 +72,16 @@ exports.updateSettings = async (req, res) => {
       return res.status(404).json({ error: 'User not found' });
     }
 
-    // 2. Update Doctor collection
+    // 2. Update Doctor collection with all fields
     const updatedDoctor = await Doctor.findOneAndUpdate(
       { userId },
       {
         specialization: req.body.specialization,
-        experience: req.body.experience,
-        consultation_fee: req.body.consultation_fee,
+        experience: req.body.experience || 0,
+        consultation_fee: req.body.consultation_fee || 0,
         available_days: req.body.available_days || [],
         available_times: req.body.available_times || [],
-        bio: req.body.bio,
+        bio: req.body.bio || '',
         leaveDays: req.body.leaveDays
       },
       { new: true, upsert: true }
@@ -121,7 +98,3 @@ exports.updateSettings = async (req, res) => {
     res.status(400).json({ error: err.message });
   }
 };
-
-
-
-
