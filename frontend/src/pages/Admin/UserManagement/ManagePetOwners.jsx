@@ -49,7 +49,7 @@ const ManagePetOwners = ({
   const handleSaveEdit = async () => {
     setLoading(true);
     try {
-      const token = localStorage.getItem('token');
+      const token = sessionStorage.getItem('token');
       const response = await fetch(`http://localhost:5000/api/users/${editingOwner._id}`, {
         method: 'PUT',
         headers: {
@@ -87,7 +87,7 @@ const ManagePetOwners = ({
     }
 
     try {
-      const token = localStorage.getItem('token');
+      const token = sessionStorage.getItem('token');
       const response = await fetch(`http://localhost:5000/api/users/${petOwner._id}`, {
         method: 'DELETE',
         headers: {
@@ -355,7 +355,7 @@ const ManagePetOwners = ({
                             </div>
                             <div className="ml-4">
                               <div className="text-sm font-medium text-gray-900">{petOwner.name}</div>
-                              <div className="text-sm text-gray-500">ID: {petOwner._id}</div>
+                              {/* <div className="text-sm text-gray-500">ID: {petOwner._id}</div> */}
                             </div>
                           </div>
                         </td>

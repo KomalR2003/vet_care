@@ -20,30 +20,54 @@ const Login = ({ onLogin, setCurrentView }) => {
   };
 
   const handleSubmit = async (e) => {
-    e.preventDefault();
-    setLoading(true);
-    setError('');
+  e.preventDefault();
+  setLoading(true);
+  setError('');
 
-    try {
-      const response = await authAPI.login(formData);
-      console.log('Login response:', response.data);
-      
-      if (response.data.token && response.data.user) {
-        onLogin(response.data.user);
+  try {
+    const response = await authAPI.login(formData);
+    console.log('Login response:', response.data);
+
+    //  Check if response has valid data
+    if (response.data.token && response.data.user) {
+      //  Clear previous login data (like admin/doctor tokens)
+      sessionStorage.clear();
+
+      //  Save the correct token and user info for current login
+      sessionStorage.setItem('token', response.data.token);
+      sessionStorage.setItem('user', JSON.stringify(response.data.user));
+
+      //  Trigger your onLogin callback
+      onLogin(response.data.user);
+
+      // Role-based redirection
+      const userRole = response.data.user.role;
+      if (userRole === 'admin') {
+        setCurrentView('adminDashboard');
+      } else if (userRole === 'doctor') {
+        setCurrentView('doctorDashboard');
+      } else if (userRole === 'pet owner') {
+        setCurrentView('petOwnerDashboard');
       } else {
-        setError('Invalid response from server');
+        setCurrentView('dashboard');
       }
-    } catch (error) {
-      console.error('Login error:', error);
-      setError(
-        error.response?.data?.error || 
-        error.response?.data?.message || 
-        'Login failed. Please check your credentials.'
-      );
-    } finally {
-      setLoading(false);
+
+    } else {
+      setError('Invalid response from server');
     }
-  };
+
+  } catch (error) {
+    console.error('Login error:', error);
+    setError(
+      error.response?.data?.error ||
+      error.response?.data?.message ||
+      'Login failed. Please check your credentials.'
+    );
+  } finally {
+    setLoading(false);
+  }
+};
+
 
   return (
     <div className="min-h-screen bg-gradient-to-br from-blue-50 to-indigo-100 flex items-center justify-center p-4">

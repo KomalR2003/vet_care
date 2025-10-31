@@ -4,7 +4,7 @@ import { FileText, Search, Eye, XCircle } from 'lucide-react';
 import { reportsAPI } from '../../api/api';
 
 const PatientHistory = ({
-  user, appointments = [], pets = [], setCurrentView, setUser, currentView, isSidebarOpen, setIsSidebarOpen
+  user,  pets = [], setCurrentView, setUser, currentView, isSidebarOpen, setIsSidebarOpen
 }) => {
   const [search, setSearch] = useState('');
   const [showModal, setShowModal] = useState(false);

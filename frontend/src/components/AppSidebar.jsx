@@ -122,7 +122,7 @@ const AppSidebar = ({ user, setCurrentView, setUser, currentView, isSidebarOpen,
   // Use the handleLogout from parent component if provided, otherwise use local logout
   const logout = handleLogout || (() => {
     setUser(null);
-    localStorage.removeItem('token');
+     localStorage.clear();
     setCurrentView('login');
   });
 

@@ -12,7 +12,7 @@ import ManageDoctors from './pages/Admin/UserManagement/ManageDoctors';
 import AllAppointments from './pages/Admin/AppointmentOversight/AllAppointments';
 import AllPets from './pages/Admin/PetManagement/AllPets';
 import MedicalHistory from './pages/Admin/PetManagement/MedicalHistory';
-import AdminReports from './pages/Admin/Reports/AdminReports ';
+import AdminReports from './pages/Admin/Reports/AdminReports';
 import ChatbotAdminPanel from './pages/Admin/ChatbotAdmin/ChatbotAdminPanel';
 
 // Pet Owner Components
@@ -38,8 +38,12 @@ function App() {
   const [pets, setPets] = useState([]);
   const [appointments, setAppointments] = useState([]);
   const [isSidebarOpen, setIsSidebarOpen] = useState(false);
-  const [loading, setLoading] = useState(true); // Start with loading true
+  
+  const [loading, setLoading] = useState(true); 
   const [error, setError] = useState(null);
+
+
+  
 
   // Fetch data when user logs in
   useEffect(() => {
@@ -88,6 +92,7 @@ function App() {
     }
   };
 
+  
   // Refresh functions for specific data
   const refreshPets = async () => {
     try {

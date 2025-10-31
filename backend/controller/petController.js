@@ -2,22 +2,36 @@ const Pet = require('../models/Pet');
 
 exports.createPet = async (req, res) => {
   try {
-    const petData = {
-      ...req.body,
-      owner: req.user._id // Add the logged-in user as owner
-    };
+    let ownerId;
+
+    // 🐾 If the logged-in user is a pet owner, use their ID
+    if (req.user.role === 'pet owner') {
+      ownerId = req.user._id;
+    } 
+    // 👨‍💼 If the logged-in user is admin or doctor, allow specifying an owner in body
+    else if (req.body.owner) {
+      ownerId = req.body.owner;
+    } 
+    else {
+      return res.status(400).json({ error: 'Owner ID is required' });
+    }
+
+    const petData = { ...req.body, owner: ownerId };
     const pet = new Pet(petData);
     await pet.save();
-    res.status(201).json(pet);
+
+    const savedPet = await Pet.findById(pet._id).populate('owner');
+    res.status(201).json(savedPet);
   } catch (err) {
     res.status(400).json({ error: err.message });
   }
 };
 
+
 exports.getPets = async (req, res) => {
   try {
     let query = {};
-    
+
     // If user is pet owner, only show their pets
     if (req.user.role === 'pet owner') {
       query.owner = req.user._id;
@@ -31,7 +45,7 @@ exports.getPets = async (req, res) => {
     else if (req.user.role === 'admin') {
       query = {};
     }
-    
+
     const pets = await Pet.find(query).populate('owner reports');
     res.json(pets);
   } catch (err) {
@@ -53,12 +67,12 @@ exports.updatePet = async (req, res) => {
   try {
     const pet = await Pet.findById(req.params.id);
     if (!pet) return res.status(404).json({ error: 'Pet not found' });
-    
+
     // Check if user owns this pet (for pet owners) or is admin
     if (req.user.role === 'pet owner' && pet.owner.toString() !== req.user._id.toString()) {
       return res.status(403).json({ error: 'Not authorized to update this pet' });
     }
-    
+
     const updatedPet = await Pet.findByIdAndUpdate(req.params.id, req.body, { new: true });
     res.json(updatedPet);
   } catch (err) {
@@ -70,12 +84,12 @@ exports.deletePet = async (req, res) => {
   try {
     const pet = await Pet.findById(req.params.id);
     if (!pet) return res.status(404).json({ error: 'Pet not found' });
-    
+
     // Check if user owns this pet (for pet owners) or is admin
     if (req.user.role === 'pet owner' && pet.owner.toString() !== req.user._id.toString()) {
       return res.status(403).json({ error: 'Not authorized to delete this pet' });
     }
-    
+
     await Pet.findByIdAndDelete(req.params.id);
     res.json({ message: 'Pet deleted' });
   } catch (err) {
@@ -89,15 +103,15 @@ exports.deleteAllPets = async (req, res) => {
     // if (req.user.role !== 'admin') {
     //   return res.status(403).json({ error: 'Not authorized' });
     // }
-    
+
     if (!req.body.confirmDelete) {
       return res.status(400).json({ error: 'Confirmation required' });
     }
-    
+
     const result = await Pet.deleteMany({});
-    res.json({ 
+    res.json({
       message: 'All pets deleted successfully',
-      deletedCount: result.deletedCount 
+      deletedCount: result.deletedCount
     });
   } catch (err) {
     res.status(500).json({ error: err.message });

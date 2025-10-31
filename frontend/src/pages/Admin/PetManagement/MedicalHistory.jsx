@@ -386,7 +386,7 @@ const MedicalHistory = ({ user, pets, setCurrentView, setUser, currentView, isSi
                     {/* Card Header */}
                     <div className={`${
                       healthStatus.status === 'healthy' ? 'bg-blue-100' :
-                      healthStatus.status === 'attention' ? 'bg-gradient-to-r from-yellow-500 to-yellow-600' :
+                      healthStatus.status === 'attention' ? 'bg-blue-100' :
                       'bg-gradient-to-r from-blue-500 to-blue-600'
                     } p-4`}>
                       <div className="flex items-center justify-between">

@@ -55,7 +55,7 @@ const ManageDoctors = ({
   const handleSaveEdit = async () => {
     setLoading(true);
     try {
-      const token = localStorage.getItem('token');
+      const token = sessionStorage.getItem('token');
       
       // Update user info
       const userResponse = await fetch(`http://localhost:5000/api/users/${editingDoctor.userId}`, {
@@ -110,7 +110,7 @@ const ManageDoctors = ({
     }
 
     try {
-      const token = localStorage.getItem('token');
+      const token = sessionStorage.getItem('token');
       
       // Delete doctor profile first
       const doctorResponse = await fetch(`http://localhost:5000/api/doctors/${doctor._id}`, {
@@ -439,7 +439,7 @@ const ManageDoctors = ({
                             </div>
                             <div className="ml-4">
                               <div className="text-sm font-medium text-gray-900">{doctor.userId?.name}</div>
-                              <div className="text-sm text-gray-500">ID: {doctor._id}</div>
+                              {/* <div className="text-sm text-gray-500">ID: {doctor._id}</div> */}
                             </div>
                           </div>
                         </td>

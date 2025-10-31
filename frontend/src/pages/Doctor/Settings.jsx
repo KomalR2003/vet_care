@@ -1,97 +1,123 @@
-import React, { useState, useEffect } from 'react';
-import AppSidebar from '../../components/AppSidebar';
-import { Settings as SettingsIcon, User, Calendar, CheckCircle, XCircle } from 'lucide-react';
-import { doctorsAPI } from '../../api/api';
+import React, { useState, useEffect } from "react";
+import AppSidebar from "../../components/AppSidebar";
+import {
+  Settings as SettingsIcon,
+  User,
+  Calendar,
+  CheckCircle,
+  XCircle,
+  AlertCircle,
+} from "lucide-react";
+import { doctorsAPI } from "../../api/api";
 
-const Settings = ({ user, setCurrentView, setUser, currentView, isSidebarOpen, setIsSidebarOpen }) => {
+const Settings = ({
+  user,
+  setCurrentView,
+  setUser,
+  currentView,
+  isSidebarOpen,
+  setIsSidebarOpen,
+}) => {
   const [profile, setProfile] = useState({
-    name: '',
-    phone: '',
-    specialization: '',
+    name: "",
+    phone: "",
+    specialization: "",
     experience: 0,
     consultation_fee: 0,
-    bio: '',
-    availability: '',
-    leaveDays: '',
+    bio: "",
+    availability: "",
+    leaveDays: "",
     available_days: [],
-    available_times: []
+    available_times: [],
   });
-  
+
   const [success, setSuccess] = useState(false);
+  const [errorMessage, setErrorMessage] = useState("");
   const [loading, setLoading] = useState(false);
   const [loadingData, setLoadingData] = useState(true);
 
-  const weekDays = ['Monday', 'Tuesday', 'Wednesday', 'Thursday', 'Friday', 'Saturday', 'Sunday'];
+  const weekDays = [
+    "Monday",
+    "Tuesday",
+    "Wednesday",
+    "Thursday",
+    "Friday",
+    "Saturday",
+    "Sunday",
+  ];
 
   // Load current user data
   useEffect(() => {
     const loadDoctorData = async () => {
       try {
         setLoadingData(true);
-        
-        // Fetch doctor profile
         const response = await doctorsAPI.getDoctors();
-        const currentDoctor = response.data.find(doc => doc.userId._id === user._id);
-        
+        const currentDoctor = response.data.find(
+          (doc) => doc.userId._id === user._id
+        );
+
         if (currentDoctor) {
           setProfile({
-            name: user.name || '',
-            phone: user.phone || '',
-            specialization: currentDoctor.specialization || '',
+            name: user.name || "",
+            phone: user.phone || "",
+            specialization: currentDoctor.specialization || "",
             experience: currentDoctor.experience || 0,
             consultation_fee: currentDoctor.consultation_fee || 0,
-            bio: currentDoctor.bio || '',
-            availability: user.availability || '',
-            leaveDays: user.leaveDays ? user.leaveDays.join(', ') : '',
+            bio: currentDoctor.bio || "",
+            availability: user.availability || "",
+            leaveDays: user.leaveDays ? user.leaveDays.join(", ") : "",
             available_days: currentDoctor.available_days || [],
-            available_times: currentDoctor.available_times || []
+            available_times: currentDoctor.available_times || [],
           });
         } else {
-          // Set default values if no doctor profile found
           setProfile({
-            name: user.name || '',
-            phone: user.phone || '',
-            specialization: user.occupation || '',
+            name: user.name || "",
+            phone: user.phone || "",
+            specialization: user.occupation || "",
             experience: 0,
             consultation_fee: 0,
-            bio: '',
-            availability: user.availability || '',
-            leaveDays: user.leaveDays ? user.leaveDays.join(', ') : '',
+            bio: "",
+            availability: user.availability || "",
+            leaveDays: user.leaveDays ? user.leaveDays.join(", ") : "",
             available_days: [],
-            available_times: []
+            available_times: [],
           });
         }
       } catch (error) {
-        console.error('Error loading doctor data:', error);
+        console.error("Error loading doctor data:", error);
+        setErrorMessage("Failed to load profile. Please try again later.");
       } finally {
         setLoadingData(false);
       }
     };
 
-    if (user) {
-      loadDoctorData();
-    }
+    if (user) loadDoctorData();
   }, [user]);
 
   const handleChange = (field, value) => {
-    setProfile(prev => ({
+    setProfile((prev) => ({
       ...prev,
-      [field]: value
+      [field]: value,
     }));
   };
 
   const toggleDay = (day) => {
     const days = profile.available_days || [];
     if (days.includes(day)) {
-      handleChange('available_days', days.filter(d => d !== day));
+      handleChange(
+        "available_days",
+        days.filter((d) => d !== day)
+      );
     } else {
-      handleChange('available_days', [...days, day]);
+      handleChange("available_days", [...days, day]);
     }
   };
 
   const handleSubmit = async (e) => {
     e.preventDefault();
     setLoading(true);
+    setSuccess(false);
+    setErrorMessage("");
 
     try {
       const settingsData = {
@@ -102,24 +128,28 @@ const Settings = ({ user, setCurrentView, setUser, currentView, isSidebarOpen, s
         consultation_fee: parseFloat(profile.consultation_fee) || 0,
         bio: profile.bio,
         availability: profile.availability,
-        leaveDays: profile.leaveDays ? profile.leaveDays.split(',').map(day => day.trim()) : [],
+        leaveDays: profile.leaveDays
+          ? profile.leaveDays.split(",").map((day) => day.trim())
+          : [],
         available_days: profile.available_days || [],
-        available_times: profile.available_times || []
+        available_times: profile.available_times || [],
       };
 
       const response = await doctorsAPI.updateSettings(settingsData);
 
-      // Update global user state
-      if (setUser) {
-        setUser(response.data);
-      }
-      
+      if (setUser) setUser(response.data);
+
+      // ✅ Show success message
       setSuccess(true);
-      setTimeout(() => setSuccess(false), 3000);
-      
+      setTimeout(() => setSuccess(false), 4000);
     } catch (error) {
-      console.error('Error updating settings:', error.response?.data || error.message);
-      alert(error.response?.data?.error || 'Failed to update settings. Please try again.');
+      console.error("Error updating settings:", error);
+      const msg =
+        error.response?.data?.error ||
+        error.response?.data?.message ||
+        "Failed to update settings. Please try again.";
+      setErrorMessage(msg);
+      setTimeout(() => setErrorMessage(""), 5000);
     } finally {
       setLoading(false);
     }
@@ -156,74 +186,90 @@ const Settings = ({ user, setCurrentView, setUser, currentView, isSidebarOpen, s
       <main className="flex-1 ml-0 p-6 overflow-auto">
         <div className="flex items-center mb-6">
           <SettingsIcon className="w-8 h-8 text-blue-600 mr-3" />
-          <h1 className="text-2xl font-bold text-gray-800">Profile & Schedule Settings</h1>
+          <h1 className="text-2xl font-bold text-gray-800">
+            Profile & Schedule Settings
+          </h1>
         </div>
-        
-        <form onSubmit={handleSubmit} className="bg-white rounded-lg shadow p-6 max-w-4xl mx-auto space-y-6">
-          {/* Personal Information Section */}
+
+        <form
+          onSubmit={handleSubmit}
+          className="bg-white rounded-lg shadow p-6 max-w-4xl mx-auto space-y-6"
+        >
+          {/* Personal Info */}
           <div>
             <h2 className="text-lg font-semibold mb-4 flex items-center gap-2">
               <User className="w-5 h-5" /> Personal Information
             </h2>
             <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
               <div>
-                <label className="block text-sm font-medium text-gray-700 mb-2">Name *</label>
-                <input 
-                  type="text" 
+                <label className="block text-sm font-medium text-gray-700 mb-2">
+                  Name *
+                </label>
+                <input
+                  type="text"
                   value={profile.name}
-                  onChange={(e) => handleChange('name', e.target.value)}
-                  className="w-full border border-gray-300 rounded-lg px-3 py-2" 
-                  required 
+                  onChange={(e) => handleChange("name", e.target.value)}
+                  className="w-full border border-gray-300 rounded-lg px-3 py-2"
+                  required
                 />
               </div>
               <div>
-                <label className="block text-sm font-medium text-gray-700 mb-2">Phone *</label>
-                <input 
-                  type="text" 
+                <label className="block text-sm font-medium text-gray-700 mb-2">
+                  Phone *
+                </label>
+                <input
+                  type="text"
                   value={profile.phone}
-                  onChange={(e) => handleChange('phone', e.target.value)}
-                  className="w-full border border-gray-300 rounded-lg px-3 py-2" 
-                  required 
+                  onChange={(e) => handleChange("phone", e.target.value)}
+                  className="w-full border border-gray-300 rounded-lg px-3 py-2"
+                  required
                 />
               </div>
             </div>
           </div>
 
-          {/* Professional Information Section */}
+          {/* Professional Info */}
           <div>
-            <h2 className="text-lg font-semibold mb-4">Professional Information</h2>
+            <h2 className="text-lg font-semibold mb-4">Professional Info</h2>
             <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
               <div>
-                <label className="block text-sm font-medium text-gray-700 mb-2">Specialization *</label>
-                <input 
-                  type="text" 
+                <label className="block text-sm font-medium text-gray-700 mb-2">
+                  Specialization *
+                </label>
+                <input
+                  type="text"
                   value={profile.specialization}
-                  onChange={(e) => handleChange('specialization', e.target.value)}
-                  className="w-full border border-gray-300 rounded-lg px-3 py-2" 
-                  required 
+                  onChange={(e) =>
+                    handleChange("specialization", e.target.value)
+                  }
+                  className="w-full border border-gray-300 rounded-lg px-3 py-2"
+                  required
                 />
               </div>
               <div>
-                <label className="block text-sm font-medium text-gray-700 mb-2">Experience (years) *</label>
-                <input 
-                  type="number" 
+                <label className="block text-sm font-medium text-gray-700 mb-2">
+                  Experience (years) *
+                </label>
+                <input
+                  type="number"
                   value={profile.experience}
-                  onChange={(e) => handleChange('experience', e.target.value)}
-                  className="w-full border border-gray-300 rounded-lg px-3 py-2" 
-                  min="0"
-                  required 
+                  onChange={(e) => handleChange("experience", e.target.value)}
+                  className="w-full border border-gray-300 rounded-lg px-3 py-2"
+                  required
                 />
               </div>
               <div>
-                <label className="block text-sm font-medium text-gray-700 mb-2">Consultation Fee ($) *</label>
-                <input 
-                  type="number" 
+                <label className="block text-sm font-medium text-gray-700 mb-2">
+                  Consultation Fee (₹) *
+                </label>
+                <input
+                  type="number"
                   value={profile.consultation_fee}
-                  onChange={(e) => handleChange('consultation_fee', e.target.value)}
-                  className="w-full border border-gray-300 rounded-lg px-3 py-2" 
-                  min="0"
-                  step="0.01"
-                  required 
+                  onChange={(e) =>
+                    handleChange("consultation_fee", e.target.value)
+                  }
+                  className="w-full border border-gray-300 rounded-lg px-3 py-2"
+                  required
                 />
               </div>
             </div>
@@ -232,47 +278,47 @@ const Settings = ({ user, setCurrentView, setUser, currentView, isSidebarOpen, s
           {/* Bio Section */}
           <div>
             <h2 className="text-lg font-semibold mb-4">About Me</h2>
-            <div>
-              <label className="block text-sm font-medium text-gray-700 mb-2">Bio</label>
-              <textarea 
-                value={profile.bio}
-                onChange={(e) => handleChange('bio', e.target.value)}
-                rows={4}
-                className="w-full border border-gray-300 rounded-lg px-3 py-2" 
-                placeholder="Tell us about yourself and your expertise..."
-              />
-            </div>
+            <textarea
+              value={profile.bio}
+              onChange={(e) => handleChange("bio", e.target.value)}
+              rows={4}
+              className="w-full border border-gray-300 rounded-lg px-3 py-2"
+              placeholder="Tell us about yourself and your expertise..."
+            />
           </div>
 
-          {/* Availability Section */}
+          {/* Availability */}
           <div>
             <h2 className="text-lg font-semibold mb-4 flex items-center gap-2">
               <Calendar className="w-5 h-5" /> Availability & Schedule
             </h2>
-            
             <div className="mb-4">
-              <label className="block text-sm font-medium text-gray-700 mb-2">General Availability</label>
-              <input 
-                type="text" 
+              <label className="block text-sm font-medium text-gray-700 mb-2">
+                General Availability
+              </label>
+              <input
+                type="text"
                 value={profile.availability}
-                onChange={(e) => handleChange('availability', e.target.value)}
-                className="w-full border border-gray-300 rounded-lg px-3 py-2" 
-                placeholder="e.g. Mon-Fri, 9am-5pm" 
+                onChange={(e) => handleChange("availability", e.target.value)}
+                className="w-full border border-gray-300 rounded-lg px-3 py-2"
+                placeholder="e.g. Mon-Fri, 9am-5pm"
               />
             </div>
 
             <div className="mb-4">
-              <label className="block text-sm font-medium text-gray-700 mb-2">Available Days</label>
+              <label className="block text-sm font-medium text-gray-700 mb-2">
+                Available Days
+              </label>
               <div className="flex flex-wrap gap-2">
-                {weekDays.map(day => (
+                {weekDays.map((day) => (
                   <button
                     key={day}
                     type="button"
                     onClick={() => toggleDay(day)}
                     className={`px-4 py-2 rounded-lg text-sm font-medium transition-colors ${
                       profile.available_days?.includes(day)
-                        ? 'bg-blue-600 text-white'
-                        : 'bg-gray-200 text-gray-700 hover:bg-gray-300'
+                        ? "bg-blue-600 text-white"
+                        : "bg-gray-200 text-gray-700 hover:bg-gray-300"
                     }`}
                   >
                     {day}
@@ -280,49 +326,50 @@ const Settings = ({ user, setCurrentView, setUser, currentView, isSidebarOpen, s
                 ))}
               </div>
             </div>
-
-            <div className="mb-4">
-              <label className="block text-sm font-medium text-gray-700 mb-2">Available Time Slots (comma separated)</label>
-              <input 
-                type="text" 
-                value={profile.available_times?.join(', ') || ''}
-                onChange={(e) => handleChange('available_times', e.target.value.split(',').map(t => t.trim()).filter(t => t))}
-                className="w-full border border-gray-300 rounded-lg px-3 py-2" 
-                placeholder="e.g., 9:00 AM - 12:00 PM, 2:00 PM - 6:00 PM" 
-              />
-            </div>
           </div>
 
-          {/* Leave Days Section */}
+          {/* Leave Days */}
           <div>
             <h2 className="text-lg font-semibold mb-4 flex items-center gap-2">
               <XCircle className="w-5 h-5" /> Leave Days (Optional)
             </h2>
-            <input 
-              type="text" 
+            <input
+              type="text"
               value={profile.leaveDays}
-              onChange={(e) => handleChange('leaveDays', e.target.value)}
-              className="w-full border border-gray-300 rounded-lg px-3 py-2" 
-              placeholder="e.g. 2024-06-10, 2024-06-15" 
+              onChange={(e) => handleChange("leaveDays", e.target.value)}
+              className="w-full border border-gray-300 rounded-lg px-3 py-2"
+              placeholder="e.g. Sunday, Wednesday"
             />
           </div>
 
-          {/* Submit Button */}
+          {/* Submit */}
           <div className="flex justify-end pt-4">
-            <button 
-              type="submit" 
+            <button
+              type="submit"
               disabled={loading}
-              className="bg-blue-600 text-white px-6 py-2 rounded-lg shadow hover:bg-blue-700 font-semibold text-base transition disabled:opacity-50 disabled:cursor-not-allowed"
+              className="bg-blue-600 text-white px-6 py-2 rounded-lg shadow hover:bg-blue-700 font-semibold text-base transition disabled:opacity-50"
             >
-              {loading ? 'Saving...' : 'Save Changes'}
+              {loading ? "Saving..." : "Save Changes"}
             </button>
           </div>
 
-          {/* Success Message */}
+          {/* ✅ Success Message */}
           {success && (
-            <div className="flex flex-col items-center justify-center mt-4 p-4 bg-green-50 rounded-lg">
+            <div className="flex flex-col items-center justify-center mt-4 p-4 bg-green-50 rounded-lg border border-green-300 animate-fadeIn">
               <CheckCircle className="w-8 h-8 text-green-500 mb-2" />
-              <p className="text-lg font-semibold text-green-700">Profile updated successfully!</p>
+              <p className="text-lg font-semibold text-green-700">
+                Profile updated successfully!
+              </p>
+            </div>
+          )}
+
+          {/*  Error Message */}
+          {errorMessage && (
+            <div className="flex flex-col items-center justify-center mt-4 p-4 bg-red-50 rounded-lg border border-red-300 animate-fadeIn">
+              <AlertCircle className="w-8 h-8 text-red-500 mb-2" />
+              <p className="text-lg font-semibold text-red-700">
+                {errorMessage}
+              </p>
             </div>
           )}
         </form>
