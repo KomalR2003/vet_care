@@ -1,5 +1,5 @@
 import React, { useState, useEffect } from 'react';
-import { petsAPI, appointmentsAPI, doctorsAPI } from './api/api';
+import { petsAPI, appointmentsAPI, doctorsAPI, reportsAPI } from './api/api';
 
 // Auth Components
 import Login from './pages/Auth/Login';
@@ -37,6 +37,7 @@ function App() {
   const [doctors, setDoctors] = useState([]);
   const [pets, setPets] = useState([]);
   const [appointments, setAppointments] = useState([]);
+  const [reports, setReports] = useState([]);
   const [isSidebarOpen, setIsSidebarOpen] = useState(false);
   
   const [loading, setLoading] = useState(true); 
@@ -44,6 +45,47 @@ function App() {
 
 
   
+  // Rehydrate auth state and view on initial load so refresh doesn't log out
+  useEffect(() => {
+    try {
+      const userStr = sessionStorage.getItem('user');
+      const token = sessionStorage.getItem('token');
+      if (userStr && token) {
+        const savedUser = JSON.parse(userStr);
+        setUser(savedUser);
+        const savedView = sessionStorage.getItem('currentView');
+        if (savedView) {
+          setCurrentView(savedView);
+        } else if (savedUser?.role === 'admin') {
+          setCurrentView('adminDashboard');
+        } else if (savedUser?.role === 'doctor') {
+          setCurrentView('doctorDashboard');
+        } else if (savedUser?.role === 'pet owner') {
+          setCurrentView('petOwnerDashboard');
+        }
+      }
+    } catch (e) {
+      // ignore parse errors, fallback to login
+    }
+
+    // Handle global auth errors (401) to reset to login view
+    const onAuthError = () => {
+      setUser(null);
+      setCurrentView('login');
+    };
+    window.addEventListener('auth-error', onAuthError);
+    return () => window.removeEventListener('auth-error', onAuthError);
+  }, []);
+
+  // Persist current view so page refresh keeps the same section
+  useEffect(() => {
+    if (user) {
+      try {
+        sessionStorage.setItem('currentView', currentView);
+      } catch (_) {}
+    }
+  }, [currentView, user]);
+
 
   // Fetch data when user logs in
   useEffect(() => {
@@ -75,14 +117,16 @@ function App() {
         setAppointments(appointmentsResponse.data);
         setPets(petsResponse.data);
       } else if (user.role === 'admin') {
-        const [petsResponse, appointmentsResponse, doctorsResponse] = await Promise.all([
+        const [petsResponse, appointmentsResponse, doctorsResponse, reportsResponse] = await Promise.all([
           petsAPI.getPets(),
           appointmentsAPI.getAppointments(),
-          doctorsAPI.getDoctors()
+          doctorsAPI.getDoctors(),
+          reportsAPI.getReports()
         ]);
         setPets(petsResponse.data);
         setAppointments(appointmentsResponse.data);
         setDoctors(doctorsResponse.data);
+        setReports(reportsResponse.data);
       }
     } catch (error) {
       console.error('Error fetching data:', error);
@@ -127,6 +171,7 @@ function App() {
     pets,
     appointments,
     doctors,
+    reports,
     setCurrentView,
     setUser,
     currentView,

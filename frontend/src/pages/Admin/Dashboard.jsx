@@ -10,6 +10,7 @@ import {
   Star,
   Activity,
   TrendingUp,
+  FileText,
 } from "lucide-react";
 
 import AppSidebar from "../../components/AppSidebar";
@@ -19,6 +20,7 @@ const DoctorDashboard = ({
   doctors = [],
   pets = [],
   appointments = [],
+  reports = [],
   setCurrentView,
   setUser,
   currentView,
@@ -29,6 +31,7 @@ const DoctorDashboard = ({
   const totalDoctors = doctors.length;
   const totalPets = pets.length;
   const totalAppointments = appointments.length;
+  const totalReports = reports.length;
   const pendingAppointments = appointments.filter(
     (a) => a.status === "pending"
   ).length;
@@ -131,9 +134,9 @@ const DoctorDashboard = ({
               iconColor="text-yellow-600"
             />
             <StatCard
-              title="Today Appointments"
-              value={0}
-              icon={<Calendar className="w-6 h-6" />}
+              title="Total Reports"
+              value={totalReports}
+              icon={<FileText className="w-6 h-6" />}
               bgColor="bg-pink-100"
               textColor="text-pink-600"
               iconColor="text-pink-600"
