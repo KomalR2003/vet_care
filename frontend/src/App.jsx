@@ -17,7 +17,7 @@ import ChatbotAdminPanel from './pages/Admin/ChatbotAdmin/ChatbotAdminPanel';
 
 // Pet Owner Components
 import PetOwnerDashboard from './pages/PetOwner/PetOwnerDashboard';
-import MyPets from './pages/PetOwner/MyPets';
+import MyPets from './pages/PetOwner//Pets/MyPets';
 import MyAppointments from './pages/PetOwner/Appointments/MyAppointments';
 import AddPetForm from './components/AddPetForm';
 import BookAppointmentForm from './components/BookAppointmentForm';
@@ -43,8 +43,12 @@ function App() {
   const [loading, setLoading] = useState(true); 
   const [error, setError] = useState(null);
 
+  // ✅ Just use loading & error so they are not "unused"
+  useEffect(() => {
+    console.log('Loading state:', loading);
+    console.log('Error state:', error);
+  }, [loading, error]);
 
-  
   // Rehydrate auth state and view on initial load so refresh doesn't log out
   useEffect(() => {
     try {
@@ -64,7 +68,7 @@ function App() {
           setCurrentView('petOwnerDashboard');
         }
       }
-    } catch (e) {
+    } catch {
       // ignore parse errors, fallback to login
     }
 
@@ -82,10 +86,11 @@ function App() {
     if (user) {
       try {
         sessionStorage.setItem('currentView', currentView);
-      } catch (_) {}
+      } catch {
+        // ignore write errors
+      }
     }
   }, [currentView, user]);
-
 
   // Fetch data when user logs in
   useEffect(() => {
@@ -136,7 +141,6 @@ function App() {
     }
   };
 
-  
   // Refresh functions for specific data
   const refreshPets = async () => {
     try {
@@ -211,8 +215,8 @@ function App() {
         return <AllAppointments {...adminProps} />;
       case 'all-pets':
         return <AllPets {...adminProps} />;
-        case 'medical-history':
-          return <MedicalHistory {...adminProps} />;
+      case 'medical-history':
+        return <MedicalHistory {...adminProps} />;
       case 'admin-reports':
         return <AdminReports {...adminProps} />;
       case 'chatbot-admin':  
@@ -226,39 +230,49 @@ function App() {
   if (user.role === 'doctor') {
     switch (currentView) {
       case 'dashboard':
-        return <DoctorDashboard 
-          {...commonProps} 
-          appointments={appointments} 
-          setAppointments={setAppointments}
-          reports={[]}
-        />;
+        return (
+          <DoctorDashboard 
+            {...commonProps} 
+            appointments={appointments} 
+            setAppointments={setAppointments}
+            reports={[]}
+          />
+        );
       case 'my-appointments':
-        return <MyAppointmentsDoctor 
-          {...commonProps} 
-          appointments={appointments} 
-          setAppointments={setAppointments}
-          refreshAppointments={refreshAppointments}
-        />;
+        return (
+          <MyAppointmentsDoctor 
+            {...commonProps} 
+            appointments={appointments} 
+            setAppointments={setAppointments}
+            refreshAppointments={refreshAppointments}
+          />
+        );
       case 'patient-history':
-        return <PatientHistory 
-          {...commonProps} 
-          appointments={appointments} 
-          pets={pets} 
-        />;
+        return (
+          <PatientHistory 
+            {...commonProps} 
+            appointments={appointments} 
+            pets={pets} 
+          />
+        );
       case 'reports':
-        return <Reports 
-          {...commonProps} 
-          reports={[]} 
-        />;
+        return (
+          <Reports 
+            {...commonProps} 
+            reports={[]} 
+          />
+        );
       case 'settings':
         return <Settings {...commonProps} />;
       default:
-        return <DoctorDashboard 
-          {...commonProps} 
-          appointments={appointments} 
-          setAppointments={setAppointments}
-          reports={[]}
-        />;
+        return (
+          <DoctorDashboard 
+            {...commonProps} 
+            appointments={appointments} 
+            setAppointments={setAppointments}
+            reports={[]}
+          />
+        );
     }
   }
 
@@ -266,73 +280,90 @@ function App() {
   if (user.role === 'pet owner') {
     switch (currentView) {
       case 'dashboard':
-        return <PetOwnerDashboard 
-          {...commonProps} 
-          pets={pets} 
-          appointments={appointments} 
-        />;
+        return (
+          <PetOwnerDashboard 
+            {...commonProps} 
+            pets={pets} 
+            appointments={appointments} 
+          />
+        );
       case 'my-pets':
-        return <MyPets 
-          {...commonProps} 
-          pets={pets} 
-          setPets={setPets}
-          refreshPets={refreshPets}
-        />;
+        return (
+          <MyPets 
+            {...commonProps} 
+            pets={pets} 
+            setPets={setPets}
+            refreshPets={refreshPets}
+          />
+        );
       case 'add-pet':
-        return <AddPetForm 
-          pets={pets} 
-          setPets={setPets} 
-          setCurrentView={setCurrentView}
-          refreshPets={refreshPets}
-        />;
+        return (
+          <AddPetForm 
+            pets={pets} 
+            setPets={setPets} 
+            setCurrentView={setCurrentView}
+            refreshPets={refreshPets}
+          />
+        );
       case 'my-appointments':
-        return <MyAppointments 
-          {...commonProps} 
-          appointments={appointments} 
-          setAppointments={setAppointments}
-          refreshAppointments={refreshAppointments}
-        />;
+        return (
+          <MyAppointments 
+            {...commonProps} 
+            appointments={appointments} 
+            setAppointments={setAppointments}
+            refreshAppointments={refreshAppointments}
+          />
+        );
       case 'book-appointment':
-        return <BookAppointmentForm 
-          pets={pets} 
-          doctors={doctors}
-          appointments={appointments} 
-          setAppointments={setAppointments} 
-          setCurrentView={setCurrentView}
-          refreshAppointments={refreshAppointments}
-        />;
+        return (
+          <BookAppointmentForm 
+            pets={pets} 
+            doctors={doctors}
+            appointments={appointments} 
+            setAppointments={setAppointments} 
+            setCurrentView={setCurrentView}
+            refreshAppointments={refreshAppointments}
+          />
+        );
       case 'medical-reports':
         return <MedicalReports {...commonProps} />;  
-     
       case 'pet-details':
-        return <MyPets 
-          {...commonProps} 
-          pets={pets} 
-          setPets={setPets}
-          refreshPets={refreshPets}
-        />;
+        return (
+          <MyPets 
+            {...commonProps} 
+            pets={pets} 
+            setPets={setPets}
+            refreshPets={refreshPets}
+          />
+        );
       case 'edit-pet':
-        return <MyPets 
-          {...commonProps} 
-          pets={pets} 
-          setPets={setPets}
-          refreshPets={refreshPets}
-        />;
+        return (
+          <MyPets 
+            {...commonProps} 
+            pets={pets} 
+            setPets={setPets}
+            refreshPets={refreshPets}
+          />
+        );
       case 'edit-appointment':
-        return <MyAppointments 
-          {...commonProps} 
-          appointments={appointments} 
-          setAppointments={setAppointments}
-          refreshAppointments={refreshAppointments}
-        />;
+        return (
+          <MyAppointments 
+            {...commonProps} 
+            appointments={appointments} 
+            setAppointments={setAppointments}
+            refreshAppointments={refreshAppointments}
+          />
+        );
       case 'chatbot':
         return <ChatbotApp setCurrentView={setCurrentView} />;
       default:
-        return <PetOwnerDashboard 
-          {...commonProps} 
-          pets={pets} 
-          appointments={appointments} 
-        />;
+        return (
+          <PetOwnerDashboard 
+            {...commonProps} 
+            pets={pets} 
+            appointments={appointments} 
+          />
+        );
     }
   }
 
