@@ -22,7 +22,7 @@ api.interceptors.response.use(
   (res) => res,
   (error) => {
     if (error.response?.status === 401) {
-      console.log('🔒 Auth error - clearing session');
+      // console.log('Auth error - clearing session');
       sessionStorage.removeItem('token');
       sessionStorage.removeItem('user');
       if (window.location.pathname !== '/login') {

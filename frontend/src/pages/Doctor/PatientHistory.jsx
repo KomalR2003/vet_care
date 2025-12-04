@@ -21,10 +21,10 @@ const PatientHistory = ({
   const fetchReports = async () => {
     try {
       const response = await reportsAPI.getReports();
-      console.log('📊 Fetched reports:', response.data); // Debug log
+      console.log('Fetched reports:', response.data); // Debug log
       setReports(response.data || []);
     } catch (error) {
-      console.error('❌ Error fetching reports:', error);
+      console.error(' Error fetching reports:', error);
       setReports([]);
     }
   };
@@ -34,13 +34,13 @@ const PatientHistory = ({
   );
 
   const handleViewHistory = (pet) => {
-    console.log('🐕 Selected pet FULL OBJECT:', JSON.stringify(pet, null, 2));
-    console.log('📋 All reports:', JSON.stringify(reports, null, 2));
+    // console.log('Selected pet FULL OBJECT:', JSON.stringify(pet, null, 2));
+    // console.log(' All reports:', JSON.stringify(reports, null, 2));
     
     setSelectedPet(pet);
     setLoading(true);
     
-    // Filter reports for this specific pet - try multiple matching strategies
+    // Filter reports for this specific pet 
     const petReports = reports.filter(report => {
       // Get pet ID from report in different possible formats
       let reportPetId = null;
@@ -71,24 +71,24 @@ const PatientHistory = ({
       const nameSpeciesMatch = nameMatch && reportPetSpecies && selectedPetSpecies && 
                                reportPetSpecies === selectedPetSpecies;
       
-      console.log('🔍 Comparing Report:', {
-        reportPetId,
-        selectedPetId,
-        reportPetName,
-        selectedPetName,
-        reportPetSpecies,
-        selectedPetSpecies,
-        idMatch,
-        nameMatch,
-        nameSpeciesMatch,
-        finalMatch: idMatch || nameMatch || nameSpeciesMatch
-      });
+      // console.log(' Comparing Report:', {
+      //   reportPetId,
+      //   selectedPetId,
+      //   reportPetName,
+      //   selectedPetName,
+      //   reportPetSpecies,
+      //   selectedPetSpecies,
+      //   idMatch,
+      //   nameMatch,
+      //   nameSpeciesMatch,
+      //   finalMatch: idMatch || nameMatch || nameSpeciesMatch
+      // });
       
       return idMatch || nameMatch || nameSpeciesMatch;
     });
     
-    console.log('✅ Filtered pet reports COUNT:', petReports.length);
-    console.log('✅ Filtered pet reports:', JSON.stringify(petReports, null, 2));
+    // console.log(' Filtered pet reports COUNT:', petReports.length);
+    // console.log(' Filtered pet reports:', JSON.stringify(petReports, null, 2));
     
     // Sort by date (most recent first)
     const sortedReports = petReports.sort((a, b) => 
