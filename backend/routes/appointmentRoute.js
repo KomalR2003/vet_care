@@ -17,5 +17,7 @@ router.delete('/:id', authenticateToken, appointmentController.deleteAppointment
 router.post('/:id/confirm', authenticateToken, appointmentController.confirmAppointment);
 router.post('/:id/cancel', authenticateToken, appointmentController.cancelAppointment);
 router.post('/:id/reschedule', authenticateToken, appointmentController.rescheduleAppointment);
+router.post('/:id/complete', authenticateToken, appointmentController.completeAppointment);
+
 
 module.exports = router;

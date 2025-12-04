@@ -1,5 +1,5 @@
 import React, { useState, useEffect } from 'react';
-import { petsAPI, appointmentsAPI, doctorsAPI, reportsAPI } from './api/api';
+import { petsAPI, appointmentsAPI, doctorsAPI, reportsAPI, usersAPI } from './api/api';
 
 // Auth Components
 import Login from './pages/Auth/Login';
@@ -38,12 +38,13 @@ function App() {
   const [pets, setPets] = useState([]);
   const [appointments, setAppointments] = useState([]);
   const [reports, setReports] = useState([]);
+  const [usersList, setUsersList] = useState([]);
   const [isSidebarOpen, setIsSidebarOpen] = useState(false);
-  
-  const [loading, setLoading] = useState(true); 
+
+  const [loading, setLoading] = useState(true);
   const [error, setError] = useState(null);
 
-  // ✅ Just use loading & error so they are not "unused"
+
   useEffect(() => {
     console.log('Loading state:', loading);
     console.log('Error state:', error);
@@ -104,7 +105,7 @@ function App() {
     try {
       setLoading(true);
       setError(null);
-      
+
       if (user.role === 'pet owner') {
         const [petsResponse, appointmentsResponse, doctorsResponse] = await Promise.all([
           petsAPI.getPets(),
@@ -126,12 +127,14 @@ function App() {
           petsAPI.getPets(),
           appointmentsAPI.getAppointments(),
           doctorsAPI.getDoctors(),
-          reportsAPI.getReports()
+          reportsAPI.getReports(),
+          usersAPI.getAllUsers()
         ]);
         setPets(petsResponse.data);
         setAppointments(appointmentsResponse.data);
         setDoctors(doctorsResponse.data);
         setReports(reportsResponse.data);
+        setUsersList(usersResponse.data);
       }
     } catch (error) {
       console.error('Error fetching data:', error);
@@ -176,6 +179,7 @@ function App() {
     appointments,
     doctors,
     reports,
+    usersList,
     setCurrentView,
     setUser,
     currentView,
@@ -219,8 +223,8 @@ function App() {
         return <MedicalHistory {...adminProps} />;
       case 'admin-reports':
         return <AdminReports {...adminProps} />;
-      case 'chatbot-admin':  
-        return <ChatbotAdminPanel {...adminProps} />;   
+      case 'chatbot-admin':
+        return <ChatbotAdminPanel {...adminProps} />;
       default:
         return <AdminDashboard {...adminProps} />;
     }
@@ -231,44 +235,44 @@ function App() {
     switch (currentView) {
       case 'dashboard':
         return (
-          <DoctorDashboard 
-            {...commonProps} 
-            appointments={appointments} 
+          <DoctorDashboard
+            {...commonProps}
+            appointments={appointments}
             setAppointments={setAppointments}
             reports={[]}
           />
         );
       case 'my-appointments':
         return (
-          <MyAppointmentsDoctor 
-            {...commonProps} 
-            appointments={appointments} 
+          <MyAppointmentsDoctor
+            {...commonProps}
+            appointments={appointments}
             setAppointments={setAppointments}
             refreshAppointments={refreshAppointments}
           />
         );
       case 'patient-history':
         return (
-          <PatientHistory 
-            {...commonProps} 
-            appointments={appointments} 
-            pets={pets} 
+          <PatientHistory
+            {...commonProps}
+            appointments={appointments}
+            pets={pets}
           />
         );
       case 'reports':
         return (
-          <Reports 
-            {...commonProps} 
-            reports={[]} 
+          <Reports
+            {...commonProps}
+            reports={[]}
           />
         );
       case 'settings':
         return <Settings {...commonProps} />;
       default:
         return (
-          <DoctorDashboard 
-            {...commonProps} 
-            appointments={appointments} 
+          <DoctorDashboard
+            {...commonProps}
+            appointments={appointments}
             setAppointments={setAppointments}
             reports={[]}
           />
@@ -281,75 +285,75 @@ function App() {
     switch (currentView) {
       case 'dashboard':
         return (
-          <PetOwnerDashboard 
-            {...commonProps} 
-            pets={pets} 
-            appointments={appointments} 
+          <PetOwnerDashboard
+            {...commonProps}
+            pets={pets}
+            appointments={appointments}
           />
         );
       case 'my-pets':
         return (
-          <MyPets 
-            {...commonProps} 
-            pets={pets} 
+          <MyPets
+            {...commonProps}
+            pets={pets}
             setPets={setPets}
             refreshPets={refreshPets}
           />
         );
       case 'add-pet':
         return (
-          <AddPetForm 
-            pets={pets} 
-            setPets={setPets} 
+          <AddPetForm
+            pets={pets}
+            setPets={setPets}
             setCurrentView={setCurrentView}
             refreshPets={refreshPets}
           />
         );
       case 'my-appointments':
         return (
-          <MyAppointments 
-            {...commonProps} 
-            appointments={appointments} 
+          <MyAppointments
+            {...commonProps}
+            appointments={appointments}
             setAppointments={setAppointments}
             refreshAppointments={refreshAppointments}
           />
         );
       case 'book-appointment':
         return (
-          <BookAppointmentForm 
-            pets={pets} 
+          <BookAppointmentForm
+            pets={pets}
             doctors={doctors}
-            appointments={appointments} 
-            setAppointments={setAppointments} 
+            appointments={appointments}
+            setAppointments={setAppointments}
             setCurrentView={setCurrentView}
             refreshAppointments={refreshAppointments}
           />
         );
       case 'medical-reports':
-        return <MedicalReports {...commonProps} />;  
+        return <MedicalReports {...commonProps} />;
       case 'pet-details':
         return (
-          <MyPets 
-            {...commonProps} 
-            pets={pets} 
+          <MyPets
+            {...commonProps}
+            pets={pets}
             setPets={setPets}
             refreshPets={refreshPets}
           />
         );
       case 'edit-pet':
         return (
-          <MyPets 
-            {...commonProps} 
-            pets={pets} 
+          <MyPets
+            {...commonProps}
+            pets={pets}
             setPets={setPets}
             refreshPets={refreshPets}
           />
         );
       case 'edit-appointment':
         return (
-          <MyAppointments 
-            {...commonProps} 
-            appointments={appointments} 
+          <MyAppointments
+            {...commonProps}
+            appointments={appointments}
             setAppointments={setAppointments}
             refreshAppointments={refreshAppointments}
           />
@@ -358,10 +362,10 @@ function App() {
         return <ChatbotApp setCurrentView={setCurrentView} />;
       default:
         return (
-          <PetOwnerDashboard 
-            {...commonProps} 
-            pets={pets} 
-            appointments={appointments} 
+          <PetOwnerDashboard
+            {...commonProps}
+            pets={pets}
+            appointments={appointments}
           />
         );
     }

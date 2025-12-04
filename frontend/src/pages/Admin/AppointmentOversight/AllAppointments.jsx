@@ -161,12 +161,12 @@ const AllAppointments = ({ user, appointments, setCurrentView, setUser, currentV
             {/* Modal panel */}
             <div className="inline-block align-bottom bg-white rounded-lg text-left overflow-hidden shadow-xl transform transition-all sm:my-8 sm:align-middle sm:max-w-2xl sm:w-full">
               {/* Header */}
-              <div className="bg-gradient-to-r from-blue-600 to-blue-700 px-6 py-4 flex items-center justify-between">
+              <div className=" px-6 py-4 flex items-center justify-between">
                 <div className="flex items-center space-x-3">
                   <div className="bg-white bg-opacity-20 p-2 rounded-lg">
                     <Calendar className="w-6 h-6 text-white" />
                   </div>
-                  <h3 className="text-xl font-bold text-white">Appointment Details</h3>
+                  <h3 className="text-xl font-bold text-black">Appointment Details</h3>
                 </div>
                 <button
                   onClick={closeModal}

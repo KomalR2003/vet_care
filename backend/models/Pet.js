@@ -24,14 +24,8 @@ const petSchema = new mongoose.Schema({
   prescriptions: [prescriptionSchema],
   notes: { type: String },
   owner: { type: mongoose.Schema.Types.ObjectId, ref: 'User', required: true },
+  reports: [{ type: mongoose.Schema.Types.ObjectId, ref: 'Report' }],
   createdAt: { type: Date, default: Date.now }
-});
-
-// Virtual populate for reports
-petSchema.virtual('reports', {
-  ref: 'Report',
-  localField: '_id',
-  foreignField: 'pet'
 });
 
 // Ensure virtuals are included in JSON and Object output

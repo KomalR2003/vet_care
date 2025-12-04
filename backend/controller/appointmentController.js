@@ -258,3 +258,31 @@ exports.rescheduleAppointment = async (req, res) => {
     res.status(400).json({ error: err.message });
   }
 };
+exports.completeAppointment = async (req, res) => {
+  try {
+    const appointment = await Appointment.findByIdAndUpdate(
+      req.params.id,
+      { status: 'completed' },
+      { new: true }
+    )
+      .populate('pet')
+      .populate('owner', 'name email')
+      .populate({
+        path: 'doctor',
+        populate: { path: 'userId', select: 'name email' }
+      });
+      
+    if (!appointment) return res.status(404).json({ error: 'Appointment not found' });
+    
+    const aptObj = appointment.toObject();
+    const transformedAppointment = {
+      ...aptObj,
+      petName: aptObj.pet?.name || 'Unknown Pet',
+      doctorName: aptObj.doctor?.userId?.name || 'Unknown Doctor'
+    };
+    
+    res.json(transformedAppointment);
+  } catch (err) {
+    res.status(400).json({ error: err.message });
+  }
+};

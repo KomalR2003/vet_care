@@ -58,20 +58,20 @@ const MedicalHistory = ({ user, pets, setCurrentView, setUser, currentView, isSi
       <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50 p-4">
         <div className="bg-white rounded-2xl shadow-2xl w-full max-w-5xl max-h-[90vh] overflow-y-auto">
           {/* Header */}
-          <div className="sticky top-0 bg-gradient-to-r from-blue-600 to-blue-700 text-white p-6 rounded-t-2xl">
+          <div className="sticky top-0 bg-blue-100 text-blue-600 p-6 rounded-t-2xl">
             <div className="flex justify-between items-start">
               <div className="flex items-center space-x-4">
                 <div className="w-16 h-16 bg-white bg-opacity-20 rounded-full flex items-center justify-center">
-                  <Heart className="w-8 h-8 text-white" />
+                  <Heart className="w-8 h-8 text-blue-600" />
                 </div>
                 <div>
                   <h2 className="text-3xl font-bold mb-1">{selectedPet.name}'s Medical History</h2>
-                  <p className="text-blue-100">{selectedPet.species} - {selectedPet.breed}</p>
+                  <p className="text-blue-500">{selectedPet.species} - {selectedPet.breed}</p>
                 </div>
               </div>
               <button 
                 onClick={() => setShowDetailsModal(false)} 
-                className="text-white hover:bg-white hover:bg-opacity-20 rounded-full p-2 transition-colors"
+                className="text-black hover:bg-white hover:bg-opacity-20 rounded-full p-2 transition-colors"
               >
                 <X className="w-6 h-6" />
               </button>
@@ -387,7 +387,7 @@ const MedicalHistory = ({ user, pets, setCurrentView, setUser, currentView, isSi
                     <div className={`${
                       healthStatus.status === 'healthy' ? 'bg-blue-100' :
                       healthStatus.status === 'attention' ? 'bg-blue-100' :
-                      'bg-gradient-to-r from-blue-500 to-blue-600'
+                      'bg-blue-100'
                     } p-4`}>
                       <div className="flex items-center justify-between">
                         <div className="flex items-center space-x-3">

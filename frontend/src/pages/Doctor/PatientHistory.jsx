@@ -4,7 +4,7 @@ import { FileText, Search, Eye, XCircle } from 'lucide-react';
 import { reportsAPI } from '../../api/api';
 
 const PatientHistory = ({
-  user,  pets = [], setCurrentView, setUser, currentView, isSidebarOpen, setIsSidebarOpen
+  user, pets = [], appointments = [], setCurrentView, setUser, currentView, isSidebarOpen, setIsSidebarOpen
 }) => {
   const [search, setSearch] = useState('');
   const [showModal, setShowModal] = useState(false);
@@ -21,7 +21,7 @@ const PatientHistory = ({
   const fetchReports = async () => {
     try {
       const response = await reportsAPI.getReports();
-      console.log('Fetched reports:', response.data); // Debug log
+      console.log('Fetched reports:', response.data);
       setReports(response.data || []);
     } catch (error) {
       console.error(' Error fetching reports:', error);
@@ -29,17 +29,36 @@ const PatientHistory = ({
     }
   };
 
-  const filteredPets = pets.filter(pet =>
-    pet.name.toLowerCase().includes(search.toLowerCase())
-  );
+  const filteredPets = pets.filter(pet => {
+    const matchesSearch = pet.name.toLowerCase().includes(search.toLowerCase());
+
+    // Check if pet has any appointment with this doctor
+    // Note: appointments prop passed from App.jsx is already filtered for this doctor
+    const hasAppointment = appointments.some(apt =>
+      (apt.pet?._id === pet._id || apt.pet === pet._id)
+    );
+
+    // Check if pet has any reports
+    const hasReports = reports.some(report => {
+      let reportPetId = null;
+      if (report.pet) {
+        if (typeof report.pet === 'string') reportPetId = report.pet;
+        else if (report.pet._id) reportPetId = report.pet._id;
+        else if (report.pet.id) reportPetId = report.pet.id;
+      }
+      return reportPetId === pet._id;
+    });
+
+    return matchesSearch && hasAppointment && hasReports;
+  });
 
   const handleViewHistory = (pet) => {
     // console.log('Selected pet FULL OBJECT:', JSON.stringify(pet, null, 2));
     // console.log(' All reports:', JSON.stringify(reports, null, 2));
-    
+
     setSelectedPet(pet);
     setLoading(true);
-    
+
     // Filter reports for this specific pet 
     const petReports = reports.filter(report => {
       // Get pet ID from report in different possible formats
@@ -53,24 +72,24 @@ const PatientHistory = ({
           reportPetId = report.pet.id;
         }
       }
-      
+
       // Get selected pet ID - try ALL possible sources
       const selectedPetId = pet._id || pet.id || pet.petId;
-      
+
       // Get pet names for comparison (case-insensitive, trimmed)
       const reportPetName = (report.pet?.name || '').toLowerCase().trim();
       const selectedPetName = (pet.name || pet.petName || '').toLowerCase().trim();
-      
+
       // Get pet species for additional matching
       const reportPetSpecies = (report.pet?.species || '').toLowerCase().trim();
       const selectedPetSpecies = (pet.species || '').toLowerCase().trim();
-      
+
       // Match by ID first, then by name, then by name+species combo
       const idMatch = reportPetId && selectedPetId && reportPetId === selectedPetId;
       const nameMatch = reportPetName && selectedPetName && reportPetName === selectedPetName;
-      const nameSpeciesMatch = nameMatch && reportPetSpecies && selectedPetSpecies && 
-                               reportPetSpecies === selectedPetSpecies;
-      
+      const nameSpeciesMatch = nameMatch && reportPetSpecies && selectedPetSpecies &&
+        reportPetSpecies === selectedPetSpecies;
+
       // console.log(' Comparing Report:', {
       //   reportPetId,
       //   selectedPetId,
@@ -83,18 +102,18 @@ const PatientHistory = ({
       //   nameSpeciesMatch,
       //   finalMatch: idMatch || nameMatch || nameSpeciesMatch
       // });
-      
+
       return idMatch || nameMatch || nameSpeciesMatch;
     });
-    
+
     // console.log(' Filtered pet reports COUNT:', petReports.length);
     // console.log(' Filtered pet reports:', JSON.stringify(petReports, null, 2));
-    
+
     // Sort by date (most recent first)
-    const sortedReports = petReports.sort((a, b) => 
+    const sortedReports = petReports.sort((a, b) =>
       new Date(b.date) - new Date(a.date)
     );
-    
+
     setPetHistory(sortedReports);
     setLoading(false);
     setShowModal(true);
@@ -109,10 +128,10 @@ const PatientHistory = ({
   const formatDate = (dateString) => {
     if (!dateString) return 'N/A';
     const date = new Date(dateString);
-    return date.toLocaleDateString('en-US', { 
-      year: 'numeric', 
-      month: 'short', 
-      day: 'numeric' 
+    return date.toLocaleDateString('en-US', {
+      year: 'numeric',
+      month: 'short',
+      day: 'numeric'
     });
   };
 
@@ -167,11 +186,11 @@ const PatientHistory = ({
                       <td className="py-2">{pet.breed}</td>
                       <td className="py-2">{pet.owner?.name || pet.ownerName || 'N/A'}</td>
                       <td className="py-2">
-                        <button 
-                          className="bg-blue-500 text-white px-2 py-1 rounded hover:bg-blue-600 flex items-center" 
+                        <button
+                          className="bg-blue-500 text-white px-2 py-1 rounded hover:bg-blue-600 flex items-center"
                           onClick={() => handleViewHistory(pet)}
-                        > 
-                          <Eye className="w-4 h-4 mr-1" /> View History 
+                        >
+                          <Eye className="w-4 h-4 mr-1" /> View History
                         </button>
                       </td>
                     </tr>
@@ -181,7 +200,7 @@ const PatientHistory = ({
             </table>
           </div>
         </div>
-        
+
         {/* Popup Modal for Patient History */}
         {showModal && selectedPet && (
           <div className="fixed inset-0 z-50 flex items-center justify-center bg-black bg-opacity-40">
@@ -199,7 +218,7 @@ const PatientHistory = ({
               <p className="text-gray-500 mb-4">
                 Owner: {selectedPet?.owner?.name || selectedPet?.ownerName || 'N/A'}
               </p>
-              
+
               <div className="overflow-x-auto">
                 <table className="min-w-full text-sm mb-2">
                   <thead>

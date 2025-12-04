@@ -36,16 +36,7 @@ const Settings = ({
   const [loading, setLoading] = useState(false);
   const [loadingData, setLoadingData] = useState(true);
 
-  const weekDays = [
-    "Monday",
-    "Tuesday",
-    "Wednesday",
-    "Thursday",
-    "Friday",
-    "Saturday",
-    "Sunday",
-  ];
-
+  
   // Load current user data
   useEffect(() => {
     const loadDoctorData = async () => {
@@ -101,17 +92,7 @@ const Settings = ({
     }));
   };
 
-  const toggleDay = (day) => {
-    const days = profile.available_days || [];
-    if (days.includes(day)) {
-      handleChange(
-        "available_days",
-        days.filter((d) => d !== day)
-      );
-    } else {
-      handleChange("available_days", [...days, day]);
-    }
-  };
+ 
 
   const handleSubmit = async (e) => {
     e.preventDefault();
@@ -139,7 +120,7 @@ const Settings = ({
 
       if (setUser) setUser(response.data);
 
-      // ✅ Show success message
+      //  Show success message
       setSuccess(true);
       setTimeout(() => setSuccess(false), 4000);
     } catch (error) {
@@ -305,42 +286,10 @@ const Settings = ({
               />
             </div>
 
-            <div className="mb-4">
-              <label className="block text-sm font-medium text-gray-700 mb-2">
-                Available Days
-              </label>
-              <div className="flex flex-wrap gap-2">
-                {weekDays.map((day) => (
-                  <button
-                    key={day}
-                    type="button"
-                    onClick={() => toggleDay(day)}
-                    className={`px-4 py-2 rounded-lg text-sm font-medium transition-colors ${
-                      profile.available_days?.includes(day)
-                        ? "bg-blue-600 text-white"
-                        : "bg-gray-200 text-gray-700 hover:bg-gray-300"
-                    }`}
-                  >
-                    {day}
-                  </button>
-                ))}
-              </div>
-            </div>
+           
           </div>
 
-          {/* Leave Days */}
-          <div>
-            <h2 className="text-lg font-semibold mb-4 flex items-center gap-2">
-              <XCircle className="w-5 h-5" /> Leave Days (Optional)
-            </h2>
-            <input
-              type="text"
-              value={profile.leaveDays}
-              onChange={(e) => handleChange("leaveDays", e.target.value)}
-              className="w-full border border-gray-300 rounded-lg px-3 py-2"
-              placeholder="e.g. Sunday, Wednesday"
-            />
-          </div>
+        
 
           {/* Submit */}
           <div className="flex justify-end pt-4">

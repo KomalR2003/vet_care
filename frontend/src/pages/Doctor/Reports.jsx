@@ -94,7 +94,7 @@ const Reports = ({ user, setCurrentView, setUser, currentView, isSidebarOpen, se
 
     useEffect(() => {
       if (formData.pet) {
-        const petAppts = appointments.filter(apt => 
+        const petAppts = appointments.filter(apt =>
           (apt.pet?._id === formData.pet || apt.pet === formData.pet)
         );
         setSelectedPetAppointments(petAppts);
@@ -233,11 +233,13 @@ const Reports = ({ user, setCurrentView, setUser, currentView, isSidebarOpen, se
                     required
                   >
                     <option value="">Choose a pet...</option>
-                    {pets.map(pet => (
-                      <option key={pet._id} value={pet._id}>
-                        {pet.name} - {pet.species} ({pet.breed})
-                      </option>
-                    ))}
+                    {pets
+                      .filter(pet => appointments.some(apt => (apt.pet?._id === pet._id || apt.pet === pet._id)))
+                      .map(pet => (
+                        <option key={pet._id} value={pet._id}>
+                          {pet.name} - {pet.species} ({pet.breed})
+                        </option>
+                      ))}
                   </select>
                 </div>
 

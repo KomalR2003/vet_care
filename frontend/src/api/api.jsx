@@ -69,6 +69,11 @@ export const authAPI = {
   },
 };
 
+// ----------------- USERS API -----------------
+export const usersAPI = {
+  getAllUsers: () => api.get('/users'),
+};
+
 // ----------------- PETS API -----------------
 export const petsAPI = {
   getPets: () => api.get('/pets'),
@@ -90,6 +95,8 @@ export const appointmentsAPI = {
   cancelAppointment: (id) => api.post(`/appointments/${id}/cancel`),
   rescheduleAppointment: (id, data) =>
     api.post(`/appointments/${id}/reschedule`, data),
+  completeAppointment: (id) => api.post(`/appointments/${id}/complete`),
+
 };
 
 // ----------------- DOCTORS API -----------------

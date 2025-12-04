@@ -63,6 +63,24 @@ const MyAppointments = ({ user, appointments, setCurrentView, setUser, currentVi
     }
   };
 
+  const handleComplete = async () => {
+    if (selectedAppointment) {
+      try {
+        await appointmentsAPI.completeAppointment(selectedAppointment._id);
+        updateAppointmentStatus(selectedAppointment._id, 'completed');
+        // Update global state
+        const updatedAppointments = appointments.map(apt =>
+          apt._id === selectedAppointment._id ? { ...apt, status: 'completed' } : apt
+        );
+        setAppointments(updatedAppointments);
+        closeModal();
+      } catch (error) {
+        console.error('Error completing appointment:', error);
+        alert('Failed to complete appointment. Please try again.');
+      }
+    }
+  };
+
   return (
     <div className="flex h-screen bg-gray-50">
       <AppSidebar
@@ -177,12 +195,20 @@ const MyAppointments = ({ user, appointments, setCurrentView, setUser, currentVi
                   </>
                 )}
                 {selectedAppointment.status === 'confirmed' && (
-                  <button
-                    onClick={handleCancel}
-                    className="flex items-center gap-2 bg-gradient-to-r from-red-400 to-red-600 text-white px-6 py-2 rounded-lg shadow hover:from-red-500 hover:to-red-700 font-semibold text-base transition"
-                  >
-                    <XCircle className="w-5 h-5" /> Cancel Appointment
-                  </button>
+                  <>
+                    <button
+                      onClick={handleComplete}
+                      className="flex items-center gap-2 bg-gradient-to-r from-blue-400 to-blue-600 text-white px-6 py-2 rounded-lg shadow hover:from-blue-500 hover:to-blue-700 font-semibold text-base transition"
+                    >
+                      <CheckCircle className="w-5 h-5" /> Completed
+                    </button>
+                    <button
+                      onClick={handleCancel}
+                      className="flex items-center gap-2 bg-gradient-to-r from-red-400 to-red-600 text-white px-6 py-2 rounded-lg shadow hover:from-red-500 hover:to-red-700 font-semibold text-base transition"
+                    >
+                      <XCircle className="w-5 h-5" /> Cancel Appointment
+                    </button>
+                  </>
                 )}
               </div>
             </div>
