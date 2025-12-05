@@ -401,7 +401,7 @@ const PetOwnerDetailsModal = ({ selectedPetOwner, handleCloseDetails }) => {
                         </td>
                         <td className="px-4 py-4 whitespace-nowrap text-sm text-gray-900">{pet.species}</td>
                         <td className="px-4 py-4 whitespace-nowrap text-sm text-gray-900">{pet.breed}</td>
-                        <td className="px-4 py-4 whitespace-nowrap text-sm text-gray-900">{pet.age} years}</td>
+                        <td className="px-4 py-4 whitespace-nowrap text-sm text-gray-900">{pet.age} years</td>
                       </tr>
                     ))}
                   </tbody>

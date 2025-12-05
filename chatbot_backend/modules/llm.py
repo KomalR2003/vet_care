@@ -25,13 +25,12 @@ class HybridRetriever:
             if not results:
                 return None
             
-            # Filter results with decent similarity (this is a simple threshold approach)
-            # In a real implementation, you might want to use a more sophisticated approach
+            # Filter results with decent similarity 
             good_results = []
             for result in results:
                 similarity = result.get('similarity', 0)
                 # Only include if similarity is above a threshold (adjust as needed)
-                if similarity > 0.1:  # Adjust this threshold based on your needs
+                if similarity > 0.1:  
                     good_results.append(result)
             
             return good_results if good_results else None
