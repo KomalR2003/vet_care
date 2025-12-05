@@ -3,7 +3,7 @@ const router = express.Router();
 const reportController = require('../controller/reportController');
 const authenticateToken = require('../middleware/auth');
 
-// Create a new report
+
 router.post('/', authenticateToken, reportController.createReport);
 
 // Get all reports (filtered by user role)

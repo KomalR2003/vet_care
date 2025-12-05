@@ -97,18 +97,11 @@ exports.deleteUser = async (req, res) => {
     if (!user) {
       return res.status(404).json({ error: 'User not found' });
     }
-
-    // If user is a doctor, delete doctor profile and related data
     if (user.role === 'doctor') {
       // Delete doctor profile
-      await Doctor.deleteOne({ userId: user._id });
-      
-      // Note: You might want to handle appointments and reports differently
-      // For example, you could set them to a "deleted doctor" status instead
-      // For now, we'll just delete the doctor profile
+      await Doctor.deleteOne({ userId: user._id });  
     }
 
-    // If user is a pet owner, delete their pets and appointments
     if (user.role === 'pet owner') {
       // Delete all pets owned by this user
       const pets = await Pet.find({ owner: user._id });

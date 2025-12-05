@@ -4,11 +4,11 @@ exports.createPet = async (req, res) => {
   try {
     let ownerId;
 
-    // 🐾 If the logged-in user is a pet owner, use their ID
+    //  If the logged-in user is a pet owner, use their ID
     if (req.user.role === 'pet owner') {
       ownerId = req.user._id;
     } 
-    // 👨‍💼 If the logged-in user is admin or doctor, allow specifying an owner in body
+    //  If the logged-in user is admin or doctor, allow specifying an owner in body
     else if (req.body.owner) {
       ownerId = req.body.owner;
     } 
@@ -99,11 +99,7 @@ exports.deletePet = async (req, res) => {
 
 exports.deleteAllPets = async (req, res) => {
   try {
-    // Temporarily comment out role check for testing
-    // if (req.user.role !== 'admin') {
-    //   return res.status(403).json({ error: 'Not authorized' });
-    // }
-
+  
     if (!req.body.confirmDelete) {
       return res.status(400).json({ error: 'Confirmation required' });
     }

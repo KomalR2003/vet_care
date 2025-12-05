@@ -3,7 +3,6 @@ const router = express.Router();
 const appointmentController = require('../controller/appointmentController');
 const authenticateToken = require('../middleware/auth');
 
-// CRUD - All routes require authentication
 
 router.delete('/', appointmentController.deleteAllAppointments);
 

@@ -3,7 +3,7 @@ const router = express.Router();
 const doctorController = require('../controller/doctorController');
 const authenticateToken = require('../middleware/auth');
 
-// CRUD - All routes require authentication
+
 router.post('/', authenticateToken, doctorController.createDoctor);
 router.get('/', authenticateToken, doctorController.getDoctors);
 
